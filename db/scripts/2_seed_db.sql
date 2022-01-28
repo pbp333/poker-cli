@@ -1,0 +1,3 @@
+-- Seed data
+INSERT INTO game_type VALUES(1, 'COMPETITIVE');
+INSERT INTO game_type VALUES(2, 'FRIENDLY');

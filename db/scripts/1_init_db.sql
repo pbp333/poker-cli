@@ -1,0 +1,62 @@
+-- Schema creation
+
+CREATE TABLE player (
+	id INT NOT NULL AUTO_INCREMENT,
+	name VARCHAR(100) NOT NULL,
+	balance DECIMAL(6, 2),
+	virtual_balance DECIMAL(6, 2),
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE game_type (
+	id INT NOT NULL,
+	type VARCHAR(15) NOT NULL,
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE game (
+	id INT NOT NULL AUTO_INCREMENT,
+	game_type_id INT NOT NULL,
+	created_by INT NOT NULL,
+	max_players INT NOT NULL,
+	chips INT NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	status VARCHAR(10) NOT NULL, -- 'CREATED', 'ONGOING', 'FINISHED'
+	PRIMARY KEY (id),
+	FOREIGN KEY (game_type_id) REFERENCES game_type(id),
+	FOREIGN KEY (created_by) REFERENCES player(id)
+);
+
+CREATE TABLE game_player (
+	id INT NOT NULL AUTO_INCREMENT,
+	game_id INT NOT NULL,
+	player_id INT NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (game_id) REFERENCES game(id),
+	FOREIGN KEY (player_id) REFERENCES player(id)
+);
+
+CREATE TABLE message (
+	id INT NOT NULL AUTO_INCREMENT,
+	from_player_id INT NOT NULL,
+	to_player_id INT NOT NULL,
+	content TEXT,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	status VARCHAR(10) NOT NULL, -- 'SENT', 'READ'
+	PRIMARY KEY (id),
+	FOREIGN KEY (from_player_id) REFERENCES player(id),
+	FOREIGN KEY (to_player_id) REFERENCES player(id)
+);
+
+CREATE TABLE audit (
+	id INT NOT NULL AUTO_INCREMENT,
+	player_id INT NOT NULL,
+	type VARCHAR(20) NOT NULL,
+	log TEXT NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (id)
+);
+
