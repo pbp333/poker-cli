@@ -1,9 +1,9 @@
-package com.isec.pokercli.constants;
+package com.isec.pokercli.view.actions;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-public enum Commands {
+public enum UserAction {
 
     // game related
     CREATE_GAME("createGame"),
@@ -13,7 +13,7 @@ public enum Commands {
     FOLD("fold"),
     CHECK("check"),
     SHUFFLE_DECK("shuffleDeck"),
-    SET_CARDS("setCards"),
+    DEAL_CARDS("setCards"),
 
     // user related
     CREATE_USER("createUser"),
@@ -22,15 +22,16 @@ public enum Commands {
 
     // others
     UNDO("undo"),
+    REDO("redo"),
     EXIT("exit");
 
-    private String action;
+    private String input;
 
-    Commands(String action) {
-        this.action = action;
+    UserAction(String input) {
+        this.input = input;
     }
 
-    public static Optional<Commands> getByCommandString(String commandString) {
-        return Arrays.stream(Commands.values()).filter(c -> c.action.equals(commandString)).findFirst();
+    public static Optional<UserAction> getByCommandString(String input) {
+        return Arrays.stream(UserAction.values()).filter(c -> c.input.equals(input)).findFirst();
     }
 }
