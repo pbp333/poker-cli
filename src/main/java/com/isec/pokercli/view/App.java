@@ -33,6 +33,9 @@ public class App {
             }
 
             switch (c.get()) {
+                case CREATE_GAME:
+                    handler.apply(new CreateGame(inputSplit[1], Integer.valueOf(inputSplit[2]), new BigDecimal(inputSplit[3])));
+                    break;
                 case JOIN_GAME:
                     handler.apply(new JoinGame(inputSplit[1], inputSplit[2]));
                     break;
