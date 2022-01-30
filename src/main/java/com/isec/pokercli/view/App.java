@@ -32,49 +32,53 @@ public class App {
                 continue;
             }
 
-            switch (c.get()) {
-                case CREATE_GAME:
-                    handler.apply(new CreateGame(inputSplit[1], Integer.valueOf(inputSplit[2]), new BigDecimal(inputSplit[3])));
-                    break;
-                case JOIN_GAME:
-                    handler.apply(new JoinGame(inputSplit[1], inputSplit[2]));
-                    break;
-                case START_GAME:
-                    handler.apply(new StartGame());
-                    break;
-                case BET:
-                    handler.apply(new Bet(inputSplit[1], new BigDecimal(inputSplit[2])));
-                    break;
-                case FOLD:
-                    handler.apply(new Fold(inputSplit[1]));
-                    break;
-                case CHECK:
-                    handler.apply(new Check(inputSplit[1]));
-                    break;
-                case SHUFFLE_DECK:
-                    handler.apply(new ShuffleDeck());
-                    break;
-                case DEAL_CARDS:
-                    handler.apply(new DealCards());
-                    break;
-                case CREATE_USER:
-                    handler.apply(new CreateUser(inputSplit[1]));
-                    break;
-                case ADD_BALANCE:
-                    handler.apply(new AddBalance(inputSplit[1], new BigDecimal(inputSplit[2])));
-                    break;
-                case MESSAGE:
-                    handler.apply(new Message(inputSplit[1], inputSplit[2], inputSplit[3]));
-                    break;
-                case UNDO:
-                    handler.undo();
-                    break;
-                case REDO:
-                    handler.redo();
-                    break;
-                case EXIT:
-                    running = false;
-                    break;
+            try {
+                switch (c.get()) {
+                    case CREATE_GAME:
+                        handler.apply(new CreateGame(inputSplit[1], Integer.parseInt(inputSplit[2]), new BigDecimal(inputSplit[3])));
+                        break;
+                    case JOIN_GAME:
+                        handler.apply(new JoinGame(inputSplit[1], inputSplit[2]));
+                        break;
+                    case START_GAME:
+                        handler.apply(new StartGame());
+                        break;
+                    case BET:
+                        handler.apply(new Bet(inputSplit[1], new BigDecimal(inputSplit[2])));
+                        break;
+                    case FOLD:
+                        handler.apply(new Fold(inputSplit[1]));
+                        break;
+                    case CHECK:
+                        handler.apply(new Check(inputSplit[1]));
+                        break;
+                    case SHUFFLE_DECK:
+                        handler.apply(new ShuffleDeck());
+                        break;
+                    case DEAL_CARDS:
+                        handler.apply(new DealCards());
+                        break;
+                    case CREATE_USER:
+                        handler.apply(new CreateUser(inputSplit[1]));
+                        break;
+                    case ADD_BALANCE:
+                        handler.apply(new AddBalance(inputSplit[1], new BigDecimal(inputSplit[2])));
+                        break;
+                    case MESSAGE:
+                        handler.apply(new Message(inputSplit[1], inputSplit[2], inputSplit[3]));
+                        break;
+                    case UNDO:
+                        handler.undo();
+                        break;
+                    case REDO:
+                        handler.redo();
+                        break;
+                    case EXIT:
+                        running = false;
+                        break;
+                }
+            } catch (Throwable e) {
+                System.out.println("User action invalid - " + input);
             }
         }
         System.out.println("Exit");
