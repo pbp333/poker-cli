@@ -65,7 +65,7 @@ public class App {
                         handler.apply(new AddBalance(inputSplit[1], new BigDecimal(inputSplit[2])));
                         break;
                     case MESSAGE:
-                        handler.apply(new Message(inputSplit[1], inputSplit[2], inputSplit[3]));
+                        handler.apply(new SendMessage(inputSplit[1], inputSplit[2], inputSplit[3]));
                         break;
                     case UNDO:
                         handler.undo();
