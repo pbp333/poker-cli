@@ -10,14 +10,16 @@ import java.util.Optional;
 
 public class Game implements IGame {
 
-    Long id;
-    Long userId;
-    GameType gameType;
-    Integer maxPlayers;
-    Integer chips;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
-    GameStatus status;
+    private Long id;
+    private Long userId;
+    private GameType gameType;
+    private Integer maxPlayers;
+    private Integer chips;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private GameStatus status;
+    private Integer bet;
+
 
     @Override
     public Long getId() {
@@ -220,6 +222,53 @@ public class Game implements IGame {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * The game builder class
+     */
+
+    public static class Builder {
+        private Long id;
+        private Long userId;
+        private GameType gameType;
+        private Integer maxPlayers;
+        private Integer chips;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+        private GameStatus status;
+        private Integer bet;
+
+        public Builder withUserId(Long id) {
+            this.userId = id;
+            return this;
+        }
+
+        public Builder withGameType(GameType type) {
+            this.gameType = type;
+            return this;
+        }
+
+        public Builder withMaxPlayers(Integer max) {
+            this.maxPlayers = max;
+            return this;
+        }
+
+        public Builder withChips(Integer chips) {
+            this.chips = chips;
+            return this;
+        }
+
+        public Builder withStatus(GameStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder withBet(Integer bet) {
+            this.bet = bet;
+            return this;
+        }
+
     }
 
 }
