@@ -20,6 +20,15 @@ public class Game implements IGame {
     private GameStatus status;
     private Integer bet;
 
+    public Game(Builder builder) {
+        this.id = builder.id;
+        this.userId = builder.userId;
+        this.gameType = builder.gameType;
+        this.maxPlayers = builder.bet;
+        this.chips = builder.chips;
+        this.status = builder.status;
+        this.bet = builder.bet;
+    }
 
     @Override
     public Long getId() {
@@ -139,26 +148,26 @@ public class Game implements IGame {
      * @throws SQLException
      */
     private static Game map(ResultSet rs) throws SQLException {
-        Game game = new Game();
-        game.setId(Long.valueOf(rs.getInt(1)));
-        game.setUserId(rs.getLong(2));
+        Builder builder = new Game.Builder();
+        builder.withId(Long.valueOf(rs.getInt(1)));
+        builder.withUserId(rs.getLong(2));
         final String gameTypeStr = rs.getString(3);
-        game.setMaxPlayers(rs.getInt(4));
-        game.setChips(rs.getInt(5));
-        game.setCreatedAt(rs.getTimestamp(6).toLocalDateTime());
-        game.setUpdatedAt(rs.getTimestamp(7).toLocalDateTime());
+        builder.withMaxPlayers(rs.getInt(4));
+        builder.withChips(rs.getInt(5));
+        builder.withCreatedAt(rs.getTimestamp(6).toLocalDateTime());
+        builder.withUpdatedAt(rs.getTimestamp(7).toLocalDateTime());
         final String statusStr = rs.getString(8);
 
         // map gametype and status to their enums
         Optional<GameType> gameType = GameType.getByString(gameTypeStr);
         if (gameType.isPresent()) {
-            game.setGameType(gameType.get());
+            builder.withGameType(gameType.get());
         }
         Optional<GameStatus> status = GameStatus.getByString(statusStr);
         if (status.isPresent()) {
-            game.setStatus(status.get());
+            builder.withStatus(status.get());
         }
-        return game;
+        return builder.build();
     }
 
     public int create() {
@@ -239,8 +248,16 @@ public class Game implements IGame {
         private GameStatus status;
         private Integer bet;
 
-        public Builder withUserId(Long id) {
+        public Builder() {
+        }
+
+        public Builder withId(Long id) {
             this.userId = id;
+
+            return this;
+        }
+        public Builder withUserId(Long userId) {
+            this.userId = userId;
             return this;
         }
 
@@ -254,10 +271,21 @@ public class Game implements IGame {
             return this;
         }
 
+        public Builder withCreatedAt(LocalDateTime dateTime) {
+            this.createdAt = dateTime;
+            return this;
+        }
+
+        public Builder withUpdatedAt(LocalDateTime dateTime) {
+            this.updatedAt = dateTime;
+            return this;
+        }
+
         public Builder withChips(Integer chips) {
             this.chips = chips;
             return this;
         }
+
 
         public Builder withStatus(GameStatus status) {
             this.status = status;
@@ -267,6 +295,10 @@ public class Game implements IGame {
         public Builder withBet(Integer bet) {
             this.bet = bet;
             return this;
+        }
+
+        public Game build() {
+            return new Game(this);
         }
 
     }
