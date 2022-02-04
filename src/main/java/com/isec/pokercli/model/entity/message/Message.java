@@ -16,13 +16,31 @@ public class Message implements IMessage {
     LocalDateTime createdAt;
     MessageStatus status;
 
+    private static MessageUnitOfWork unitOfWork = MessageUnitOfWork.getInstance();
+
+    private Message() {
+
+    }
+
+    public static Message from(Long fromUserId, Long toUserId, String content) {
+
+        var message = new Message();
+
+        message.fromUserId = fromUserId;
+        message.toUserId = toUserId;
+        message.content = content;
+        message.createdAt = LocalDateTime.now();
+
+        message.status = MessageStatus.SENT;
+
+        unitOfWork.addCreated(message);
+
+        return message;
+    }
+
     @Override
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     @Override
@@ -30,17 +48,9 @@ public class Message implements IMessage {
         return fromUserId;
     }
 
-    public void setFromUserId(Long fromUserId) {
-        this.fromUserId = fromUserId;
-    }
-
     @Override
     public Long getToUserId() {
         return toUserId;
-    }
-
-    public void setToUserId(Long toUserId) {
-        this.toUserId = toUserId;
     }
 
     @Override
@@ -48,26 +58,14 @@ public class Message implements IMessage {
         return content;
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
-
     @Override
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
     @Override
     public MessageStatus getStatus() {
         return status;
-    }
-
-    public void setStatus(MessageStatus status) {
-        this.status = status;
     }
 
     public static List<Message> getAll() {
@@ -108,22 +106,43 @@ public class Message implements IMessage {
         return result;
     }
 
+    public static Message getByOriginAndDestinationAndMessage(Long origin, Long destination, String message) {
+        try {
+            final String sql = "SELECT id, from_user_id, to_user_id, content, created_at, status FROM message WHERE " +
+                    "from_user_id = ? AND to_user_id = ? AND content = ?";
+            Connection conn = DbSessionManager.getConnection();
+            PreparedStatement st = conn.prepareStatement(sql);
+            st.setLong(1, origin);
+            st.setLong(2, destination);
+            st.setString(3, message);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return map(rs);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     private static Message map(ResultSet rs) throws SQLException {
         Message m = new Message();
-        m.setId(rs.getLong(1));
-        m.setFromUserId(rs.getLong(2));
-        m.setToUserId(rs.getLong(3));
-        m.setContent(rs.getString(4));
-        m.setCreatedAt(rs.getTimestamp(5).toLocalDateTime());
+        m.id = rs.getLong(1);
+        m.fromUserId = rs.getLong(2);
+        m.toUserId = rs.getLong(3);
+        m.content = rs.getString(4);
+        m.createdAt = rs.getTimestamp(5).toLocalDateTime();
         final String statusStr = rs.getString(6);
         Optional<MessageStatus> status = MessageStatus.getByString(statusStr);
         if (status.isPresent()) {
-            m.setStatus(status.get());
+            m.status = status.get();
         }
         return m;
     }
 
-    public int create() {
+    protected Long create() {
         try {
             final String sql = "INSERT INTO message(from_user_id, to_user_id, content, status) VALUES (?, ?, ?, ?)";
 
@@ -139,17 +158,17 @@ public class Message implements IMessage {
             ResultSet rs = pstmt.getGeneratedKeys();
             rs.next();
             int key = rs.getInt(1);
-            setId(Long.valueOf(key));
+            this.id = Long.valueOf(key);
 
-            return key;
+            return this.id;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return -1;
+        return -1L;
     }
 
-    public void update() {
+    protected void update() {
         try {
             final String sql = "UPDATE message SET from_user_id=?, to_user_id=?, content=?, status=? where id = ?";
 
@@ -168,7 +187,7 @@ public class Message implements IMessage {
         }
     }
 
-    public void delete() {
+    protected void delete() {
         try {
             final String sql = "DELETE FROM message where id = ?";
 
@@ -181,5 +200,9 @@ public class Message implements IMessage {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void remove() {
+        unitOfWork.addDeleted(this);
     }
 }
