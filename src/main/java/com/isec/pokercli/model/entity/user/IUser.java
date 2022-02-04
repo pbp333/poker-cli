@@ -17,4 +17,7 @@ public interface IUser {
 
     LocalDateTime getUpdatedAt();
 
+    void addBalance(BigDecimal amount);
+
+    void removeBalance(BigDecimal amount);
 }

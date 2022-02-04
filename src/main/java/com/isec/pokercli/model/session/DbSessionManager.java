@@ -1,4 +1,4 @@
-package com.isec.pokercli.model.entity;
+package com.isec.pokercli.model.session;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,6 +11,8 @@ public class DbSessionManager {
 
     private static Connection connection;
 
+    private static UnitOfWork unitOfWork = UnitOfWork.getInstance();
+
     public static Connection getConnection() {
         if (connection == null) {
             try {
@@ -22,5 +24,9 @@ public class DbSessionManager {
         }
 
         return connection;
+    }
+
+    public static UnitOfWork getUnitOfWork() {
+        return unitOfWork;
     }
 }

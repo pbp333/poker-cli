@@ -7,4 +7,9 @@ public class StripeAdapter implements PaymentService {
     public void addPayment(String user, BigDecimal amount) {
         System.out.println("Payment to Stripe: amount - " + amount + ", user - " + user);
     }
+
+    @Override
+    public void cancelPayment(String user, BigDecimal amount) {
+        System.out.println("Cancelling payment to Stripe: amount - " + amount + ", user - " + user);
+    }
 }

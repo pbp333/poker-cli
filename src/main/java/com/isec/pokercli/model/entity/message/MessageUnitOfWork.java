@@ -9,6 +9,16 @@ public class MessageUnitOfWork {
     private final List<Message> updated = new ArrayList<>();
     private final List<Message> deleted = new ArrayList<>();
 
+    private static final MessageUnitOfWork instance = new MessageUnitOfWork();
+
+    private MessageUnitOfWork() {
+
+    }
+
+    public static MessageUnitOfWork getInstance() {
+        return instance;
+    }
+
     public void addCreated(Message entity) {
         created.add(entity);
     }
@@ -24,5 +34,10 @@ public class MessageUnitOfWork {
         deleted.add(entity);
     }
 
+    public void commit() {
+        created.stream().forEach(Message::create);
+        updated.stream().forEach(Message::update);
+        deleted.stream().forEach(Message::delete);
+    }
 
 }

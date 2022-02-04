@@ -8,5 +8,7 @@ public interface UserService {
 
     void removeUser(String name);
 
-    void addPayment(String user, BigDecimal amount, String PaymentMethod);
+    void addPayment(String user, BigDecimal amount, String paymentMethod);
+
+    void removePayment(String user, BigDecimal amount, String paymentMethod);
 }

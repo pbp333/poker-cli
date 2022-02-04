@@ -1,6 +1,6 @@
 package com.isec.pokercli.model.entity.game;
 
-import com.isec.pokercli.model.entity.DbSessionManager;
+import com.isec.pokercli.model.session.DbSessionManager;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -233,6 +233,10 @@ public class Game implements IGame {
         }
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     /**
      * The game builder class
      */
@@ -248,7 +252,8 @@ public class Game implements IGame {
         private GameStatus status;
         private Integer bet;
 
-        public Builder() {
+        private Builder() {
+
         }
 
         public Builder withId(Long id) {
@@ -256,6 +261,7 @@ public class Game implements IGame {
 
             return this;
         }
+
         public Builder withUserId(Long userId) {
             this.userId = userId;
             return this;

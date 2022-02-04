@@ -1,6 +1,6 @@
 package com.isec.pokercli.model.entity.message;
 
-import com.isec.pokercli.model.entity.DbSessionManager;
+import com.isec.pokercli.model.session.DbSessionManager;
 
 import java.sql.*;
 import java.time.LocalDateTime;
