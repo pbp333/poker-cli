@@ -1,6 +1,6 @@
 package com.isec.pokercli.model.entity.user;
 
-import com.isec.pokercli.model.entity.DbSessionManager;
+import com.isec.pokercli.model.session.DbSessionManager;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -10,20 +10,37 @@ import java.util.List;
 
 public class User implements IUser {
 
-    Long id;
-    String name;
-    BigDecimal balance;
-    BigDecimal virtualBalance;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
+    private Long id;
+    private String name;
+    private BigDecimal balance;
+    private BigDecimal virtualBalance;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    private static UserUnitOfWork userUnitOfWork = UserUnitOfWork.getInstance();
+
+    private User() {
+
+    }
+
+    public static User from(String username) {
+
+        var user = new User();
+
+        user.name = username;
+        user.balance = BigDecimal.ZERO;
+        user.virtualBalance = BigDecimal.ZERO;
+        user.createdAt = LocalDateTime.now();
+        user.updatedAt = LocalDateTime.now();
+
+        userUnitOfWork.addCreated(user);
+
+        return user;
+    }
 
     @Override
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     @Override
@@ -31,17 +48,9 @@ public class User implements IUser {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     @Override
     public BigDecimal getBalance() {
         return balance;
-    }
-
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
     }
 
     @Override
@@ -49,17 +58,9 @@ public class User implements IUser {
         return virtualBalance;
     }
 
-    public void setVirtualBalance(BigDecimal virtualBalance) {
-        this.virtualBalance = virtualBalance;
-    }
-
     @Override
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 
     @Override
@@ -67,12 +68,25 @@ public class User implements IUser {
         return updatedAt;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+    @Override
+    public void addBalance(BigDecimal amount) {
+        this.balance = this.balance.add(amount);
+        userUnitOfWork.addUpdated(this);
+    }
+
+    @Override
+    public void removeBalance(BigDecimal amount) {
+
+        if (amount.compareTo(balance) < 1) {
+            throw new IllegalStateException("User does not have sufficient balance");
+        }
+
+        this.balance = this.balance.subtract(amount);
+        userUnitOfWork.addUpdated(this);
     }
 
     public static List<User> getAll() {
-        List<User> result = new ArrayList<User>();
+        List<User> result = new ArrayList<>();
         try {
             final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM user";
             Connection conn = DbSessionManager.getConnection();
@@ -91,7 +105,6 @@ public class User implements IUser {
     }
 
     public static User getById(Long id) {
-        User result = null;
 
         try {
             final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM user WHERE id=?";
@@ -100,30 +113,52 @@ public class User implements IUser {
             pstmt.setLong(1, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                result = mapUserFromDb(rs);
+                return mapUserFromDb(rs);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return result;
+        return null;
+    }
+
+    public static User getByUsername(String username) {
+
+        try {
+
+            final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM user WHERE username=?";
+            Connection conn = DbSessionManager.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return mapUserFromDb(rs);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     private static User mapUserFromDb(ResultSet rs) throws SQLException {
         User user = new User();
-        user.setId(Long.valueOf(rs.getInt(1)));
-        user.setName(rs.getString(2));
-        user.setBalance(rs.getBigDecimal(3));
-        user.setVirtualBalance(rs.getBigDecimal(4));
-        user.setCreatedAt(rs.getTimestamp(5).toLocalDateTime());
-        user.setUpdatedAt(rs.getTimestamp(6).toLocalDateTime());
+        user.id = Long.valueOf(rs.getInt(1));
+        user.name = rs.getString(2);
+        user.balance = rs.getBigDecimal(3);
+        user.virtualBalance = rs.getBigDecimal(4);
+        user.createdAt = rs.getTimestamp(5).toLocalDateTime();
+        user.updatedAt = rs.getTimestamp(6).toLocalDateTime();
+
         return user;
     }
 
-    public int create() {
+    protected int create() {
         try {
-            final String sql = "INSERT INTO user(name, balance, virtual_balance) VALUES (?, ?, ?)";
+            final String sql = "INSERT INTO cliuser(name, balance, virtual_balance) VALUES (?, ?, ?)";
 
             Connection conn = DbSessionManager.getConnection();
 
@@ -136,7 +171,7 @@ public class User implements IUser {
             ResultSet rs = pstmt.getGeneratedKeys();
             rs.next();
             int key = rs.getInt(1);
-            setId(Long.valueOf(key));
+            this.id = Long.valueOf(key);
 
             return key;
 
@@ -146,9 +181,9 @@ public class User implements IUser {
         return -1;
     }
 
-    public void update() {
+    protected void update() {
         try {
-            final String sql = "UPDATE user SET name=?, balance=?, virtual_balance, updated_at where id = ?";
+            final String sql = "UPDATE cliuser SET name=?, balance=?, virtual_balance, updated_at where id = ?";
 
             Connection conn = DbSessionManager.getConnection();
 
@@ -164,9 +199,9 @@ public class User implements IUser {
         }
     }
 
-    public void delete() {
+    protected void delete() {
         try {
-            final String sql = "DELETE FROM user where id = ?";
+            final String sql = "DELETE FROM cliuser where id = ?";
 
             Connection conn = DbSessionManager.getConnection();
 
@@ -179,4 +214,7 @@ public class User implements IUser {
         }
     }
 
+    public void remove() {
+        this.userUnitOfWork.addDeleted(this);
+    }
 }

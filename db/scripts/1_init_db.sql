@@ -1,6 +1,6 @@
 -- Schema creation
 
-CREATE TABLE user (
+CREATE TABLE cliuser (
 	id INT NOT NULL AUTO_INCREMENT,
 	name VARCHAR(100) NOT NULL,
 	balance DECIMAL(6, 2),
@@ -21,7 +21,7 @@ CREATE TABLE game (
 	status VARCHAR(10) NOT NULL, -- 'CREATED', 'ONGOING', 'FINISHED',
 	bet INT NOT NULL,
 	PRIMARY KEY (id),
-	FOREIGN KEY (user_id) REFERENCES user(id)
+	FOREIGN KEY (user_id) REFERENCES cliuser(id)
 );
 
 CREATE TABLE game_user (
@@ -30,7 +30,7 @@ CREATE TABLE game_user (
 	user_id INT NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY (game_id) REFERENCES game(id),
-	FOREIGN KEY (user_id) REFERENCES user(id)
+	FOREIGN KEY (user_id) REFERENCES cliuser(id)
 );
 
 CREATE TABLE message (
@@ -41,8 +41,8 @@ CREATE TABLE message (
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	status VARCHAR(10) NOT NULL, -- 'SENT', 'READ'
 	PRIMARY KEY (id),
-	FOREIGN KEY (from_user_id) REFERENCES user(id),
-	FOREIGN KEY (to_user_id) REFERENCES user(id)
+	FOREIGN KEY (from_user_id) REFERENCES cliuser(id),
+	FOREIGN KEY (to_user_id) REFERENCES cliuser(id)
 );
 
 CREATE TABLE audit (

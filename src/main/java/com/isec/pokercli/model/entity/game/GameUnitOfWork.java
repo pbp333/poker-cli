@@ -9,6 +9,16 @@ public class GameUnitOfWork {
     private final List<Game> updated = new ArrayList<>();
     private final List<Game> deleted = new ArrayList<>();
 
+    private static final GameUnitOfWork instance = new GameUnitOfWork();
+
+    private GameUnitOfWork() {
+
+    }
+
+    public static GameUnitOfWork getInstance() {
+        return instance;
+    }
+
     public void addCreated(Game entity) {
         created.add(entity);
     }
@@ -22,6 +32,12 @@ public class GameUnitOfWork {
         created.remove(entity);
         updated.remove(entity);
         deleted.add(entity);
+    }
+
+    public void commit() {
+        created.stream().forEach(Game::create);
+        updated.stream().forEach(Game::update);
+        deleted.stream().forEach(Game::delete);
     }
 
 }
