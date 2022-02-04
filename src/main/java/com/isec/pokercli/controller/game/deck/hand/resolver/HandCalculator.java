@@ -3,6 +3,7 @@ package com.isec.pokercli.controller.game.deck.hand.resolver;
 import com.isec.pokercli.controller.game.deck.DeckCard;
 import com.isec.pokercli.controller.game.deck.card.Rank;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -83,6 +84,23 @@ public class HandCalculator {
     }
 
     private static boolean isStraight(List<DeckCard> hand) {
+
+        var ranks = hand.stream().map(DeckCard::getRank).collect(Collectors.toList());
+
+        var containsAce = ranks.stream().anyMatch(rank -> rank.equals(Rank.ACE));
+
+        if (containsAce) {
+
+            var isHighStraight = ranks.containsAll(
+                    Arrays.asList(Rank.ACE, Rank.KING, Rank.QUEEN, Rank.JACK, Rank.TEN)
+            );
+            var isLowStraight = ranks.containsAll(
+                    Arrays.asList(Rank.ACE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE)
+            );
+
+            return isHighStraight || isLowStraight;
+
+        }
 
         var sortedRanks = hand.stream().map(DeckCard::getRank)
                 .sorted(Comparator.comparing(Rank::getScore, Comparator.reverseOrder()))

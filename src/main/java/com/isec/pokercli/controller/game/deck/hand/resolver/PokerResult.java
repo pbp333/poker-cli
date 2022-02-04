@@ -2,7 +2,7 @@ package com.isec.pokercli.controller.game.deck.hand.resolver;
 
 public enum PokerResult {
 
-    HIGH_CARD(100),
+    HIGH_CARD(1),
     ONE_PAIR(200),
     TWO_PAIR(300),
     THREE_OF_A_KIND(400),
