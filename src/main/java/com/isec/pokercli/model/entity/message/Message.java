@@ -108,6 +108,27 @@ public class Message implements IMessage {
         return result;
     }
 
+    public static Message getBySourceDestinationAndContent(Long fromUserId, Long toUserId, String content) {
+        Message result = null;
+        try {
+            final String sql = "SELECT id, from_user_id, to_user_id, content, created_at, status FROM message WHERE from_user_id=? and to_user_id=? and content=?";
+            Connection conn = DbSessionManager.getConnection();
+            PreparedStatement st = conn.prepareStatement(sql);
+            st.setLong(1, fromUserId);
+            st.setLong(2, toUserId);
+            st.setString(3, content);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                result = map(rs);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     private static Message map(ResultSet rs) throws SQLException {
         Message m = new Message();
         m.setId(rs.getLong(1));

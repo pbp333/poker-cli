@@ -110,6 +110,26 @@ public class User implements IUser {
         return result;
     }
 
+    public static User getByName(String name) {
+        User result = null;
+
+        try {
+            final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM user WHERE name=?";
+            Connection conn = DbSessionManager.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, name);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                result = mapUserFromDb(rs);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     private static User mapUserFromDb(ResultSet rs) throws SQLException {
         User user = new User();
         user.setId(Long.valueOf(rs.getInt(1)));
