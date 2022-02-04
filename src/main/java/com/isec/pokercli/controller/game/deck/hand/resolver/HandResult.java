@@ -1,7 +1,8 @@
 package com.isec.pokercli.controller.game.deck.hand.resolver;
 
 import com.isec.pokercli.controller.game.deck.DeckCard;
-import com.isec.pokercli.controller.game.deck.card.Rank;
+import com.isec.pokercli.controller.game.deck.hand.scoring.HandScorerFactory;
+import com.isec.pokercli.controller.game.deck.hand.scoring.scorers.HandScorer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,18 +11,16 @@ public class HandResult {
 
     private final PokerResult pokerResult;
     private final List<DeckCard> cards = new ArrayList<>();
+    private final HandScorer scorer;
 
     public HandResult(PokerResult pokerResult, List<DeckCard> cards) {
         this.pokerResult = pokerResult;
         this.cards.addAll(cards);
+        this.scorer = HandScorerFactory.buildHandScorer(pokerResult);
     }
 
     public int calculateScore() {
-
-        var cardsScore = cards.stream().map(DeckCard::getRank).map(Rank::getScore).reduce(Integer::sum).orElse(0);
-        var resultScore = pokerResult.getScore();
-
-        return cardsScore + resultScore;
+        return scorer.score(cards);
     }
 
     public PokerResult getPokerResult() {
