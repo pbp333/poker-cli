@@ -38,6 +38,10 @@ public class GameUnitOfWork {
         created.stream().forEach(Game::create);
         updated.stream().forEach(Game::update);
         deleted.stream().forEach(Game::delete);
+
+        created.clear();
+        updated.clear();
+        deleted.clear();
     }
 
 }

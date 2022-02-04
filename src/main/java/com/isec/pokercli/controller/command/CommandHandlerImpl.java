@@ -31,7 +31,7 @@ public class CommandHandlerImpl implements CommandHandler {
     public void redo() {
         var command = redo.pop();
         if (command != null) {
-            command.undo();
+            command.execute();
             undo.push(command);
         }
     }

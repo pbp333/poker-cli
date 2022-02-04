@@ -38,6 +38,10 @@ public class MessageUnitOfWork {
         created.stream().forEach(Message::create);
         updated.stream().forEach(Message::update);
         deleted.stream().forEach(Message::delete);
+
+        created.clear();
+        updated.clear();
+        deleted.clear();
     }
 
 }

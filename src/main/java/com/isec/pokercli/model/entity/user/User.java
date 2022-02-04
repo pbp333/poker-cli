@@ -127,7 +127,7 @@ public class User implements IUser {
 
         try {
 
-            final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM user WHERE username=?";
+            final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM cliuser WHERE name=?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);

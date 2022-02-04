@@ -42,5 +42,9 @@ public class UserUnitOfWork {
         created.stream().forEach(User::create);
         updated.stream().forEach(User::update);
         deleted.stream().forEach(User::delete);
+
+        created.clear();
+        updated.clear();
+        deleted.clear();
     }
 }
