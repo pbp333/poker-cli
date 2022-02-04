@@ -7,7 +7,7 @@ import com.isec.pokercli.model.session.DbSessionManager;
 public class MessageServiceImpl implements MessageService {
 
     @Override
-    public void deliverMessage(String origin, String destination, String message) {
+    public void deliverMessage(String origin, String destination, String content) {
 
         var originUser = User.getByUsername(origin);
         if (originUser == null) {
@@ -18,13 +18,32 @@ public class MessageServiceImpl implements MessageService {
         if (destinationUser == null) {
             throw new IllegalArgumentException("User does not exist - " + destination);
         }
-        Message.from(originUser.getId(), destinationUser.getId(), message);
+        Message.from(originUser.getId(), destinationUser.getId(), content);
 
         DbSessionManager.getUnitOfWork().commit();
     }
 
     @Override
-    public void deleteMessage(String origin, String destination, String message) {
+    public void deleteMessage(String origin, String destination, String content) {
 
+        var originUser = User.getByUsername(origin);
+        if (originUser == null) {
+            throw new IllegalArgumentException("User does not exist - " + origin);
+        }
+
+        var destinationUser = User.getByUsername(destination);
+        if (destinationUser == null) {
+            throw new IllegalArgumentException("User does not exist - " + destination);
+        }
+
+        var message = Message.getByOriginAndDestinationAndMessage(originUser.getId(), destinationUser.getId(), content);
+
+        if (message == null) {
+            throw new IllegalArgumentException("Message does not exist");
+        }
+
+        message.remove();
+
+        DbSessionManager.getUnitOfWork().commit();
     }
 }

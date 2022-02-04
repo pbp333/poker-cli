@@ -79,6 +79,7 @@ public class App {
                 }
             } catch (Throwable e) {
                 System.out.println("User action invalid - " + input);
+                System.out.println(e.getMessage());
             }
         }
         System.out.println("Exit");
