@@ -1,9 +1,7 @@
 package com.isec.pokercli.model.entity.user;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class UserUnitOfWork {
 
@@ -14,6 +12,7 @@ public class UserUnitOfWork {
     private static final UserUnitOfWork instance = new UserUnitOfWork();
 
     private final Map<Long, User> idMap = new HashMap<>();
+    private final Map<String, User> usernameMap = new HashMap<>();
 
     private UserUnitOfWork() {
 
@@ -46,5 +45,30 @@ public class UserUnitOfWork {
         created.clear();
         updated.clear();
         deleted.clear();
+    }
+
+    public void track(User user) {
+
+        if (user.getId() != null) {
+            idMap.put(user.getId(), user);
+        }
+
+        usernameMap.put(user.getName(), user);
+    }
+
+    public List<User> getUsers() {
+
+        Set<User> users = idMap.values().stream().collect(Collectors.toSet());
+        users.addAll(usernameMap.values());
+
+        return users.stream().collect(Collectors.toList());
+    }
+
+    public User getById(Long id) {
+        return idMap.get(id);
+    }
+
+    public User getByUsername(String username) {
+        return usernameMap.get(username);
     }
 }

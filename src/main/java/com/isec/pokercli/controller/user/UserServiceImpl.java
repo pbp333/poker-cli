@@ -10,7 +10,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void createUser(String username) {
-        User.from(username);
+        User.from(username).login();
         DbSessionManager.getUnitOfWork().commit();
     }
 
@@ -51,5 +51,15 @@ public class UserServiceImpl implements UserService {
         PaymentServiceFactory.buildPaymentService(paymentMethod).cancelPayment(username, amount);
         user.removeBalance(amount);
         DbSessionManager.getUnitOfWork().commit();
+    }
+
+    @Override
+    public void login(String username) {
+        User.getByUsername(username).login();
+    }
+
+    @Override
+    public void logout(String username) {
+        User.getByUsername(username).logout();
     }
 }

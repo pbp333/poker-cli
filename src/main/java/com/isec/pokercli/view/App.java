@@ -62,7 +62,7 @@ public class App {
                         handler.apply(new CreateUser(inputSplit[1]));
                         break;
                     case ADD_BALANCE:
-                        handler.apply(new AddBalance(inputSplit[1], new BigDecimal(inputSplit[2])));
+                        handler.apply(new AddBalance(inputSplit[1], new BigDecimal(inputSplit[2]), inputSplit[3]));
                         break;
                     case MESSAGE:
                         handler.apply(new SendMessage(inputSplit[1], inputSplit[2], inputSplit[3]));
