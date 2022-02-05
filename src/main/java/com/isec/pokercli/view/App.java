@@ -61,6 +61,12 @@ public class App {
                     case CREATE_USER:
                         handler.apply(new CreateUser(inputSplit[1]));
                         break;
+                    case LOGIN:
+                        handler.apply(new Login(inputSplit[1]));
+                        break;
+                    case LOGOUT:
+                        handler.apply(new Logout(inputSplit[1]));
+                        break;
                     case ADD_BALANCE:
                         handler.apply(new AddBalance(inputSplit[1], new BigDecimal(inputSplit[2]), inputSplit[3]));
                         break;

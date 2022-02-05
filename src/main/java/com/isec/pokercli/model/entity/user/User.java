@@ -1,5 +1,6 @@
 package com.isec.pokercli.model.entity.user;
 
+import com.isec.pokercli.model.entity.message.Message;
 import com.isec.pokercli.model.session.DbSessionManager;
 
 import java.math.BigDecimal;
@@ -133,7 +134,8 @@ public class User implements IUser {
         }
 
         try {
-            final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM user WHERE id=?";
+            final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM cliuser " +
+                    "WHERE id=?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setLong(1, id);
@@ -159,7 +161,8 @@ public class User implements IUser {
 
         try {
 
-            final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM cliuser WHERE name=?";
+            final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM cliuser " +
+                    "WHERE name=?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
@@ -248,5 +251,13 @@ public class User implements IUser {
 
     public void remove() {
         this.unitOfWork.addDeleted(this);
+    }
+
+    public void read(List<Message> messages) {
+        messages.stream().forEach(message -> {
+            var origin = User.getById(message.getFromUserId());
+            System.out.println("From - " + origin.getName() + ": " + message.getContent());
+            message.markAsRead();
+        });
     }
 }
