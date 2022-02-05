@@ -72,6 +72,9 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void addPlayerToGame(String username, String gameName) {
+
+        //TODO check user is not in another game
+
         var user = User.getByUsername(username);
 
         if (user == null) {
@@ -84,13 +87,36 @@ public class GameServiceImpl implements GameService {
             throw new IllegalArgumentException("Game does not exist");
         }
 
+        if (game.getUsers().size() >= game.getMaxPlayers()) {
+            throw new IllegalStateException("Game is full");
+        }
+
         game.addUser(user);
 
         DbSessionManager.getUnitOfWork().commit();
     }
 
     @Override
-    public void removePlayerFromGame(String username, String game) {
+    public void removePlayerFromGame(String username, String gameName) {
+        var user = User.getByUsername(username);
+
+        if (user == null) {
+            throw new IllegalArgumentException("User does not exist");
+        }
+
+        var game = Game.getByName(gameName);
+
+        if (game == null) {
+            throw new IllegalArgumentException("Game does not exist");
+        }
+
+        game.removePlayer(user);
+
+        DbSessionManager.getUnitOfWork().commit();
+    }
+
+    @Override
+    public void startGame(String gameName) {
 
     }
 }

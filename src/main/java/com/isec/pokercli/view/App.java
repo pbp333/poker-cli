@@ -49,7 +49,7 @@ public class App {
                         handler.apply(new JoinGame(inputSplit[1], inputSplit[2]));
                         break;
                     case START_GAME:
-                        handler.apply(new StartGame());
+                        handler.apply(new StartGame(inputSplit[1]));
                         break;
                     case BET:
                         handler.apply(new Bet(inputSplit[1], new BigDecimal(inputSplit[2])));

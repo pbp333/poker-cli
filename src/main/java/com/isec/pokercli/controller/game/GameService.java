@@ -13,4 +13,6 @@ public interface GameService {
     void addPlayerToGame(String username, String game);
 
     void removePlayerFromGame(String username, String game);
+
+    void startGame(String game);
 }

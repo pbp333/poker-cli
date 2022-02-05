@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -88,6 +89,10 @@ public class Game {
 
     public Integer getBet() {
         return bet;
+    }
+
+    public List<User> getUsers() {
+        return Collections.unmodifiableList(users);
     }
 
     public static List<Game> getAll() {
@@ -366,6 +371,11 @@ public class Game {
 
     public void addUser(User user) {
         this.users.add(user);
+        unitOfWork.addUpdated(this);
+    }
+
+    public void removePlayer(User user) {
+        this.users.remove(user);
         unitOfWork.addUpdated(this);
     }
 
