@@ -14,7 +14,6 @@ public class User {
     private Long id;
     private String name;
     private BigDecimal balance;
-    private BigDecimal virtualBalance;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean online;
@@ -31,7 +30,6 @@ public class User {
 
         user.name = username;
         user.balance = BigDecimal.ZERO;
-        user.virtualBalance = BigDecimal.ZERO;
         user.createdAt = LocalDateTime.now();
         user.updatedAt = LocalDateTime.now();
 
@@ -50,10 +48,6 @@ public class User {
 
     public BigDecimal getBalance() {
         return balance;
-    }
-
-    public BigDecimal getVirtualBalance() {
-        return virtualBalance;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -97,7 +91,7 @@ public class User {
         List<User> users = unitOfWork.getUsers();
         List<Long> userIds = users.stream().map(User::getId).collect(Collectors.toList());
         try {
-            String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM user";
+            String sql = "SELECT id, name, balance, created_at, updated_at FROM user";
 
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
@@ -126,7 +120,7 @@ public class User {
         }
 
         try {
-            final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM cliuser " +
+            final String sql = "SELECT id, name, balance, created_at, updated_at FROM cliuser " +
                     "WHERE id=?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -153,7 +147,7 @@ public class User {
 
         try {
 
-            final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM cliuser " +
+            final String sql = "SELECT id, name, balance, created_at, updated_at FROM cliuser " +
                     "WHERE name=?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -176,23 +170,21 @@ public class User {
         user.id = Long.valueOf(rs.getInt(1));
         user.name = rs.getString(2);
         user.balance = rs.getBigDecimal(3);
-        user.virtualBalance = rs.getBigDecimal(4);
-        user.createdAt = rs.getTimestamp(5).toLocalDateTime();
-        user.updatedAt = rs.getTimestamp(6).toLocalDateTime();
+        user.createdAt = rs.getTimestamp(4).toLocalDateTime();
+        user.updatedAt = rs.getTimestamp(5).toLocalDateTime();
 
         return user;
     }
 
     protected int create() {
         try {
-            final String sql = "INSERT INTO cliuser(name, balance, virtual_balance) VALUES (?, ?, ?)";
+            final String sql = "INSERT INTO cliuser(name, balance) VALUES (?, ?, ?)";
 
             Connection conn = DbSessionManager.getConnection();
 
             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             pstmt.setString(1, getName());
             pstmt.setBigDecimal(2, getBalance());
-            pstmt.setBigDecimal(3, getVirtualBalance());
             pstmt.executeUpdate();
 
             ResultSet rs = pstmt.getGeneratedKeys();
@@ -210,7 +202,7 @@ public class User {
 
     protected void update() {
         try {
-            final String sql = "UPDATE cliuser SET name = ?, balance = ?, virtual_balance = ?, updated_at = ? " +
+            final String sql = "UPDATE cliuser SET name = ?, balance = ?, updated_at = ? " +
                     "WHERE id = ?";
 
             Connection conn = DbSessionManager.getConnection();
@@ -218,9 +210,8 @@ public class User {
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, getName());
             pstmt.setBigDecimal(2, getBalance());
-            pstmt.setBigDecimal(3, getVirtualBalance());
-            pstmt.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
-            pstmt.setLong(5, this.id);
+            pstmt.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            pstmt.setLong(4, id);
             pstmt.executeUpdate();
 
         } catch (Exception e) {

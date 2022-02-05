@@ -15,6 +15,7 @@ public class Game {
     private Long ownerId;
     private GameType gameType;
     private Integer maxPlayers;
+    private Integer buyIn;
     private Integer initialPlayerPot;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -33,6 +34,7 @@ public class Game {
         this.ownerId = builder.ownerId;
         this.gameType = builder.gameType;
         this.maxPlayers = builder.maxPlayers;
+        this.buyIn = builder.buyIn;
         this.initialPlayerPot = builder.initialPlayerPot;
         this.status = builder.status;
         this.bet = builder.bet;
@@ -60,6 +62,10 @@ public class Game {
         return maxPlayers;
     }
 
+    public Integer getBuyIn() {
+        return buyIn;
+    }
+
     public Integer getInitialPlayerPot() {
         return initialPlayerPot;
     }
@@ -83,7 +89,7 @@ public class Game {
     public static List<Game> getAll() {
         List<Game> result = new ArrayList<>();
         try {
-            final String sql = "SELECT id, name, owner_id, game_type, max_players, initial_player_pot, created_at, " +
+            final String sql = "SELECT id, name, owner_id, game_type, max_players, buy_in, initial_player_pot, created_at, " +
                     "updated_at, status, bet FROM game";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
@@ -103,7 +109,7 @@ public class Game {
     public static List<Game> getByMinimumBalance(BigDecimal balance) {
         List<Game> result = new ArrayList<>();
         try {
-            final String sql = "SELECT id, name, owner_id, game_type, max_players, initial_player_pot, created_at, " +
+            final String sql = "SELECT id, name, owner_id, game_type, max_players, buy_in, initial_player_pot, created_at, " +
                     "updated_at, status, bet FROM game WHERE initial_player_pot <= ? OR game_type = ?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
@@ -124,7 +130,7 @@ public class Game {
 
     public static Game getById(Long id) {
         try {
-            final String sql = "SELECT id, name, owner_id, game_type, max_players, initial_player_pot, created_at, updated_at, " +
+            final String sql = "SELECT id, name, owner_id, game_type, max_players, buy_in, initial_player_pot, created_at, updated_at, " +
                     "status FROM game WHERE id  = ?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
@@ -143,7 +149,7 @@ public class Game {
 
     public static Game getByName(String gameName) {
         try {
-            final String sql = "SELECT id, name, owner_id, game_type, max_players, initial_player_pot, created_at, updated_at, " +
+            final String sql = "SELECT id, name, owner_id, game_type, max_players, buy_in, initial_player_pot, created_at, updated_at, " +
                     "status FROM game WHERE name  = ?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
@@ -188,7 +194,7 @@ public class Game {
 
     public int create() {
         try {
-            final String sql = "INSERT INTO game(name, owner_id, game_type, max_players, initial_player_pot, bet, status) " +
+            final String sql = "INSERT INTO game(name, owner_id, game_type, max_players, buy_in, initial_player_pot, bet, status) " +
                     "VALUES (? ,?, ?, ?, ?, ?, ?)";
 
             Connection conn = DbSessionManager.getConnection();
@@ -266,6 +272,7 @@ public class Game {
         private Long ownerId;
         private GameType gameType;
         private Integer maxPlayers;
+        private Integer buyIn;
         private Integer initialPlayerPot;
         private GameStatus status;
         private Integer bet;
@@ -299,6 +306,11 @@ public class Game {
             return this;
         }
 
+        public Builder buyIn(Integer buyIn) {
+            this.buyIn = buyIn;
+            return this;
+        }
+
         public Builder initialPlayerPot(Integer initialPlayerPot) {
             this.initialPlayerPot = initialPlayerPot;
             return this;
@@ -327,6 +339,7 @@ public class Game {
                 ", ownerId=" + ownerId +
                 ", gameType=" + gameType +
                 ", maxPlayers=" + maxPlayers +
+                ", buyIn=" + buyIn +
                 ", initialPlayerPot=" + initialPlayerPot +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
