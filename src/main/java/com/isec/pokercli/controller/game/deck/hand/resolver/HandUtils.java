@@ -1,6 +1,6 @@
 package com.isec.pokercli.controller.game.deck.hand.resolver;
 
-import com.isec.pokercli.controller.game.deck.DeckCard;
+import com.isec.pokercli.model.entity.game.card.DeckCard;
 import org.paukov.combinatorics3.Generator;
 
 import java.util.ArrayList;

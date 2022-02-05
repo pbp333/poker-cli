@@ -2,7 +2,7 @@ package com.isec.pokercli.controller.game;
 
 public interface GameService {
 
-    void createCompetitiveGame(String gameName, String owner, int maxNumberOfPlayers, Integer minimalBuyIn, Integer initialBet);
+    void createCompetitiveGame(String gameName, String owner, int maxNumberOfPlayers, Integer buyIn, Integer initialPlayerPot, Integer bet);
 
     void createFriendlyGame(String gameName, String owner);
 

@@ -1,5 +1,7 @@
 package com.isec.pokercli.controller.game.deck;
 
+import com.isec.pokercli.model.entity.game.card.DeckCard;
+
 import java.util.Stack;
 
 public class Deck {

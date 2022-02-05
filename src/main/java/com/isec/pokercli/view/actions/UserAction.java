@@ -15,7 +15,7 @@ public enum UserAction {
     FOLD("fold"),
     CHECK("check"),
     SHUFFLE_DECK("shuffleDeck"),
-    DEAL_CARDS("setCards"),
+    DEAL_CARDS("dealCards"),
 
     // user related
     CREATE_USER("createUser"),

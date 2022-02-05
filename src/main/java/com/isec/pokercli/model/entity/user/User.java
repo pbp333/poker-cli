@@ -178,7 +178,7 @@ public class User {
 
     protected int create() {
         try {
-            final String sql = "INSERT INTO cliuser(name, balance) VALUES (?, ?, ?)";
+            final String sql = "INSERT INTO cliuser(name, balance) VALUES (?, ?)";
 
             Connection conn = DbSessionManager.getConnection();
 

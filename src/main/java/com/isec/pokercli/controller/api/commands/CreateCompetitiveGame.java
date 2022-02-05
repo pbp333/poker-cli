@@ -9,25 +9,28 @@ public class CreateCompetitiveGame implements Command {
     private final String gameName;
     private final String owner;
     private final int maxNumberOfPlayers;
-    private final Integer minimalBuyIn;
-    private final Integer initialBet;
+    private final Integer buyIn;
+    private final Integer initialPlayerPot;
+    private final Integer bet;
 
     private final GameService service;
 
-    public CreateCompetitiveGame(String gameName, String owner, Integer maxNumberOfPlayers, Integer minimalBuyIn, Integer initialBet) {
+    public CreateCompetitiveGame(String gameName, String owner, Integer maxNumberOfPlayers,
+                                 Integer buyIn, Integer initialPlayerPot, Integer bet) {
         this.gameName = gameName;
         this.owner = owner;
         this.maxNumberOfPlayers = maxNumberOfPlayers;
-        this.minimalBuyIn = minimalBuyIn;
-        this.initialBet = initialBet;
+        this.buyIn = buyIn;
+        this.initialPlayerPot = initialPlayerPot;
+        this.bet = bet;
 
         this.service = new GameServiceImpl();
     }
 
     @Override
     public void execute() {
-        this.service.createCompetitiveGame(this.gameName, this.owner, this.maxNumberOfPlayers, this.minimalBuyIn,
-                this.initialBet);
+        this.service.createCompetitiveGame(this.gameName, this.owner, this.maxNumberOfPlayers, this.buyIn,
+                this.initialPlayerPot, this.bet);
     }
 
     @Override

@@ -11,7 +11,8 @@ public class FriendlyGameCreator implements GameCreator {
     private static final GameStatus gameStatus = GameStatus.CREATED;
 
     private static final int MAX_NUM_OF_PLAYERS = 3;
-    private static final int MINIMUM_BUY_IN = 50;
+    private static final int BUY_IN = 0;
+    private static final int INITIAL_PLAYER_POT = 50;
     private static final int BET = 4;
 
     private static final GameType gameType = GameType.FRIENDLY;
@@ -24,6 +25,6 @@ public class FriendlyGameCreator implements GameCreator {
     @Override
     public Game.Builder builder() {
         return Game.builder().name(this.gameName).ownerId(this.ownerId).status(gameStatus).maxPlayers(MAX_NUM_OF_PLAYERS)
-                .initialPlayerPot(MINIMUM_BUY_IN).bet(BET).gameType(gameType);
+                .buyIn(BUY_IN).initialPlayerPot(INITIAL_PLAYER_POT).bet(BET).gameType(gameType);
     }
 }

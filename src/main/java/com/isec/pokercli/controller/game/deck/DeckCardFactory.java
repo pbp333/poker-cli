@@ -1,7 +1,8 @@
 package com.isec.pokercli.controller.game.deck;
 
-import com.isec.pokercli.controller.game.deck.card.Rank;
-import com.isec.pokercli.controller.game.deck.card.Suit;
+import com.isec.pokercli.model.entity.game.card.Rank;
+import com.isec.pokercli.model.entity.game.card.Suit;
+import com.isec.pokercli.model.entity.game.card.DeckCard;
 
 import java.util.Arrays;
 import java.util.Collections;

@@ -4,13 +4,15 @@ import com.isec.pokercli.controller.game.creator.CompetitiveGameCreator;
 import com.isec.pokercli.controller.game.creator.FriendlyGameCreator;
 import com.isec.pokercli.controller.game.creator.GameCreator;
 import com.isec.pokercli.model.entity.game.Game;
+import com.isec.pokercli.model.entity.game.GameRound;
 import com.isec.pokercli.model.entity.user.User;
 import com.isec.pokercli.model.session.DbSessionManager;
 
 public class GameServiceImpl implements GameService {
 
     @Override
-    public void createCompetitiveGame(String gameName, String owner, int maxNumberOfPlayers, Integer minimalBuyIn, Integer initialBet) {
+    public void createCompetitiveGame(String gameName, String owner, int maxNumberOfPlayers, Integer buyIn,
+                                      Integer initialPlayerPot, Integer initialBet) {
 
         var game = Game.getByName(gameName);
 
@@ -26,12 +28,13 @@ public class GameServiceImpl implements GameService {
 
         GameCreator creator = new FriendlyGameCreator(gameName, user.getId());
 
-        creator = new CompetitiveGameCreator(creator, maxNumberOfPlayers, minimalBuyIn, initialBet);
+        creator = new CompetitiveGameCreator(creator, maxNumberOfPlayers, buyIn, initialPlayerPot, initialBet);
 
         creator.builder().build();
 
         DbSessionManager.getUnitOfWork().commit();
 
+        createGameRoundAssociatedWithGame(gameName);
     }
 
     @Override
@@ -47,6 +50,17 @@ public class GameServiceImpl implements GameService {
         creator.builder().build();
 
         DbSessionManager.getUnitOfWork().commit();
+
+        createGameRoundAssociatedWithGame(gameName);
+    }
+
+    private void createGameRoundAssociatedWithGame(String gameName) {
+        // create an empty game round associated with the game
+        Game g = Game.getByName(gameName);
+
+        GameRound gr = new GameRound();
+        gr.setGameId(g.getId());
+        gr.create();
     }
 
     @Override

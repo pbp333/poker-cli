@@ -29,9 +29,25 @@ CREATE TABLE game_user (
 	id INT NOT NULL AUTO_INCREMENT,
 	game_id INT NOT NULL,
 	user_id INT NOT NULL,
+	current_player_pot INT NOT NULL,
+	card1 VARCHAR(3),
+    card2 VARCHAR(3),
 	PRIMARY KEY (id),
 	FOREIGN KEY (game_id) REFERENCES game(id),
 	FOREIGN KEY (user_id) REFERENCES cliuser(id)
+);
+
+CREATE TABLE game_round (
+    id INT NOT NULL AUTO_INCREMENT,
+    game_id INT NOT NULL,
+    table_pot INT NOT NULL DEFAULT 0,
+    card1 VARCHAR(3),
+    card2 VARCHAR(3),
+    card3 VARCHAR(3),
+    card4 VARCHAR(3),
+    card5 VARCHAR(3),
+    PRIMARY KEY (id),
+    FOREIGN KEY (game_id) REFERENCES game(id)
 );
 
 CREATE TABLE message (

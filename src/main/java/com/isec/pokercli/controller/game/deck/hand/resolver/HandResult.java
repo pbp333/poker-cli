@@ -1,6 +1,6 @@
 package com.isec.pokercli.controller.game.deck.hand.resolver;
 
-import com.isec.pokercli.controller.game.deck.DeckCard;
+import com.isec.pokercli.model.entity.game.card.DeckCard;
 import com.isec.pokercli.controller.game.deck.hand.scoring.HandScorerFactory;
 import com.isec.pokercli.controller.game.deck.hand.scoring.scorers.HandScorer;
 

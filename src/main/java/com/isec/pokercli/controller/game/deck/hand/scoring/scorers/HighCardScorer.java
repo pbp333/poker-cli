@@ -1,7 +1,7 @@
 package com.isec.pokercli.controller.game.deck.hand.scoring.scorers;
 
-import com.isec.pokercli.controller.game.deck.DeckCard;
-import com.isec.pokercli.controller.game.deck.card.Rank;
+import com.isec.pokercli.model.entity.game.card.DeckCard;
+import com.isec.pokercli.model.entity.game.card.Rank;
 
 import java.util.List;
 

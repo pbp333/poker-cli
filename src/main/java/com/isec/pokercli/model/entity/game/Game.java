@@ -213,21 +213,24 @@ public class Game {
      * @throws SQLException
      */
     private static Game map(ResultSet rs) throws SQLException {
-
         Game game = new Game();
-        game.id = Long.valueOf(rs.getInt(1));
-        game.name = rs.getString(2);
-        game.ownerId = rs.getLong(3);
-        game.gameType = GameType.getByString(rs.getString(4))
+
+        int i = 0;
+
+        game.id = Long.valueOf(rs.getInt(++i));
+        game.name = rs.getString(++i);
+        game.ownerId = rs.getLong(++i);
+        game.gameType = GameType.getByString(rs.getString(++i))
                 .orElseThrow(() -> new IllegalStateException("Game Type is invalid"));
-        game.maxPlayers = rs.getInt(5);
-        game.buyIn = rs.getInt(6);
-        game.initialPlayerPot = rs.getInt(7);
-        game.createdAt = rs.getTimestamp(8).toLocalDateTime();
-        game.updatedAt = rs.getTimestamp(9).toLocalDateTime();
-        game.status = GameStatus.getByString(rs.getString(10))
+        game.maxPlayers = rs.getInt(++i);
+        game.buyIn = rs.getInt(++i);
+        game.initialPlayerPot = rs.getInt(++i);
+        game.createdAt = rs.getTimestamp(++i).toLocalDateTime();
+        game.updatedAt = rs.getTimestamp(++i).toLocalDateTime();
+        game.status = GameStatus.getByString(rs.getString(++i))
                 .orElseThrow(() -> new IllegalStateException("Game Status is invalid"));
-        game.bet = rs.getInt(11);
+        game.bet = rs.getInt(++i);
+
         return game;
 
     }
@@ -235,18 +238,22 @@ public class Game {
     public int create() {
         try {
             final String sql = "INSERT INTO game(name, owner_id, game_type, max_players, buy_in, initial_player_pot, bet, status) " +
-                    "VALUES (? ,?, ?, ?, ?, ?, ?)";
+                    "VALUES (? ,?, ?, ?, ?, ?, ?, ?)";
 
             Connection conn = DbSessionManager.getConnection();
 
             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pstmt.setString(1, name);
-            pstmt.setLong(2, ownerId);
-            pstmt.setString(3, gameType.name());
-            pstmt.setInt(4, maxPlayers);
-            pstmt.setInt(5, initialPlayerPot);
-            pstmt.setInt(6, bet);
-            pstmt.setString(7, status.name());
+
+            int i = 0;
+
+            pstmt.setString(++i, name);
+            pstmt.setLong(++i, ownerId);
+            pstmt.setString(++i, gameType.name());
+            pstmt.setInt(++i, maxPlayers);
+            pstmt.setInt(++i, buyIn);
+            pstmt.setInt(++i, initialPlayerPot);
+            pstmt.setInt(++i, bet);
+            pstmt.setString(++i, status.name());
             pstmt.executeUpdate();
 
             ResultSet rs = pstmt.getGeneratedKeys();
@@ -312,39 +319,16 @@ public class Game {
     }
 
     private void addUsersToGame(Long userAssociationToCreate) {
-        try {
-            final String sql = "INSERT INTO game_user(user_id, game_id) VALUES (? ,?)";
-
-            Connection conn = DbSessionManager.getConnection();
-
-            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pstmt.setLong(1, userAssociationToCreate);
-            pstmt.setLong(2, id);
-            pstmt.executeUpdate();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        GameUser gu = new GameUser();
+        gu.setUserId(userAssociationToCreate);
+        gu.setGameId(id);
+        gu.setCurrentPlayerPot(initialPlayerPot);
+        gu.create();
     }
 
     private void removeUsersFromGame(Long userAssociationToCreate) {
-        try {
-            final String sql = "DELETE FROM game_user WHERE user_id = ? AND game_id = ?";
-
-            Connection conn = DbSessionManager.getConnection();
-
-            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pstmt.setLong(1, userAssociationToCreate);
-            pstmt.setLong(2, id);
-            pstmt.executeUpdate();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        GameUser.deleteByUserIdAndGameId(userAssociationToCreate, id);
     }
-
 
     public void delete() {
         try {

@@ -40,7 +40,7 @@ public class App {
                     case CREATE_COMPETITIVE_GAME:
                         handler.apply(new CreateCompetitiveGame(inputSplit[1], inputSplit[2],
                                 Integer.parseInt(inputSplit[3]), Integer.parseInt(inputSplit[4]),
-                                Integer.parseInt(inputSplit[5])));
+                                Integer.parseInt(inputSplit[5]), Integer.parseInt(inputSplit[6])));
                         break;
                     case LIST_GAMES:
                         handler.apply(new ListGames(inputSplit[1]));
@@ -64,7 +64,7 @@ public class App {
                         handler.apply(new ShuffleDeck());
                         break;
                     case DEAL_CARDS:
-                        handler.apply(new DealCards());
+                        handler.apply(new DealCards(inputSplit[1]));
                         break;
                     case CREATE_USER:
                         handler.apply(new CreateUser(inputSplit[1]));
