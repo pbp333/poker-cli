@@ -4,6 +4,8 @@ import com.isec.pokercli.model.entity.message.Message;
 import com.isec.pokercli.model.entity.user.User;
 import com.isec.pokercli.model.session.DbSessionManager;
 
+import java.util.Arrays;
+
 public class MessageServiceImpl implements MessageService {
 
     @Override
@@ -18,7 +20,11 @@ public class MessageServiceImpl implements MessageService {
         if (destinationUser == null) {
             throw new IllegalArgumentException("User does not exist - " + destination);
         }
-        Message.from(originUser.getId(), destinationUser.getId(), content);
+        var message = Message.from(originUser.getId(), destinationUser.getId(), content);
+
+        if (destinationUser.isOnline()) {
+            destinationUser.read(Arrays.asList(message));
+        }
 
         DbSessionManager.getUnitOfWork().commit();
     }

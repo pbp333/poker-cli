@@ -132,6 +132,28 @@ public class Message implements IMessage {
         return null;
     }
 
+    public static List<Message> getNotReadByDestination(Long destination) {
+
+        List<Message> messages = new ArrayList<>();
+
+        try {
+            final String sql = "SELECT id, from_user_id, to_user_id, content, created_at, status FROM message " +
+                    "WHERE to_user_id = ? AND status != 'READ'";
+            Connection conn = DbSessionManager.getConnection();
+            PreparedStatement st = conn.prepareStatement(sql);
+            st.setLong(1, destination);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                messages.add(map(rs));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return messages;
+    }
+
     private static Message map(ResultSet rs) throws SQLException {
         Message m = new Message();
         m.id = rs.getLong(1);

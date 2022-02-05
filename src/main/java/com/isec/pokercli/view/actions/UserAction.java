@@ -17,6 +17,8 @@ public enum UserAction {
 
     // user related
     CREATE_USER("createUser"),
+    LOGIN("login"),
+    LOGOUT("logout"),
     ADD_BALANCE("addBalance"),
     MESSAGE("message"),
 

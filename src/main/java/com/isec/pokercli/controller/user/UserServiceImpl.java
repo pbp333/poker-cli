@@ -1,5 +1,6 @@
 package com.isec.pokercli.controller.user;
 
+import com.isec.pokercli.model.entity.message.Message;
 import com.isec.pokercli.model.entity.user.User;
 import com.isec.pokercli.model.payment.PaymentServiceFactory;
 import com.isec.pokercli.model.session.DbSessionManager;
@@ -55,11 +56,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void login(String username) {
-        User.getByUsername(username).login();
+        var user = User.getByUsername(username);
+        user.login();
+
+        user.read(Message.getNotReadByDestination(user.getId()));
+        DbSessionManager.getUnitOfWork().commit();
+
     }
 
     @Override
     public void logout(String username) {
         User.getByUsername(username).logout();
+        DbSessionManager.getUnitOfWork().commit();
     }
 }
