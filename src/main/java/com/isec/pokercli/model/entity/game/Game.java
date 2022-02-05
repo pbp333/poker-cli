@@ -2,11 +2,11 @@ package com.isec.pokercli.model.entity.game;
 
 import com.isec.pokercli.model.session.DbSessionManager;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class Game {
 
@@ -83,9 +83,32 @@ public class Game {
     public static List<Game> getAll() {
         List<Game> result = new ArrayList<>();
         try {
-            final String sql = "SELECT id, owner_id, game_type, max_players, initial_player_pot, created_at, updated_at, status FROM game";
+            final String sql = "SELECT id, name, owner_id, game_type, max_players, initial_player_pot, created_at, " +
+                    "updated_at, status, bet FROM game";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                Game game = map(rs);
+                result.add(game);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static List<Game> getByMinimumBalance(BigDecimal balance) {
+        List<Game> result = new ArrayList<>();
+        try {
+            final String sql = "SELECT id, name, owner_id, game_type, max_players, initial_player_pot, created_at, " +
+                    "updated_at, status, bet FROM game WHERE initial_player_pot <= ? OR game_type = ?";
+            Connection conn = DbSessionManager.getConnection();
+            PreparedStatement st = conn.prepareStatement(sql);
+            st.setInt(1, balance.intValue());
+            st.setString(2, GameType.FRIENDLY.name());
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 Game game = map(rs);
@@ -148,24 +171,19 @@ public class Game {
 
         Game game = new Game();
         game.id = Long.valueOf(rs.getInt(1));
-        game.ownerId = rs.getLong(2);
-        final String gameTypeStr = rs.getString(3);
-        game.maxPlayers = rs.getInt(4);
-        game.initialPlayerPot = rs.getInt(5);
-        game.createdAt = rs.getTimestamp(6).toLocalDateTime();
-        game.updatedAt = rs.getTimestamp(7).toLocalDateTime();
-        final String statusStr = rs.getString(8);
-
-        // map gametype and status to their enums
-        Optional<GameType> gameType = GameType.getByString(gameTypeStr);
-        if (gameType.isPresent()) {
-            game.gameType = gameType.get();
-        }
-        Optional<GameStatus> status = GameStatus.getByString(statusStr);
-        if (status.isPresent()) {
-            game.status = status.get();
-        }
+        game.name = rs.getString(2);
+        game.ownerId = rs.getLong(3);
+        game.gameType = GameType.getByString(rs.getString(4))
+                .orElseThrow(() -> new IllegalStateException("Game Type is invalid"));
+        game.maxPlayers = rs.getInt(5);
+        game.initialPlayerPot = rs.getInt(6);
+        game.createdAt = rs.getTimestamp(7).toLocalDateTime();
+        game.updatedAt = rs.getTimestamp(8).toLocalDateTime();
+        game.status = GameStatus.getByString(rs.getString(9))
+                .orElseThrow(() -> new IllegalStateException("Game Status is invalid"));
+        game.bet = rs.getInt(10);
         return game;
+
     }
 
     public int create() {
@@ -302,4 +320,18 @@ public class Game {
 
     }
 
+    @Override
+    public String toString() {
+        return "Game{" +
+                "name='" + name + '\'' +
+                ", ownerId=" + ownerId +
+                ", gameType=" + gameType +
+                ", maxPlayers=" + maxPlayers +
+                ", initialPlayerPot=" + initialPlayerPot +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", status=" + status +
+                ", bet=" + bet +
+                '}';
+    }
 }

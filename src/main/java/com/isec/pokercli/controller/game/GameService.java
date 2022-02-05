@@ -7,4 +7,6 @@ public interface GameService {
     void createFriendlyGame(String gameName, String owner);
 
     void deleteGameByName(String username);
+
+    void listEligibleGamesByUser(String username);
 }

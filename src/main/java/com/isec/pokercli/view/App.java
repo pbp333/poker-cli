@@ -42,6 +42,9 @@ public class App {
                                 Integer.parseInt(inputSplit[3]), Integer.parseInt(inputSplit[4]),
                                 Integer.parseInt(inputSplit[5])));
                         break;
+                    case LIST_GAMES:
+                        handler.apply(new ListGames(inputSplit[1]));
+                        break;
                     case JOIN_GAME:
                         handler.apply(new JoinGame(inputSplit[1], inputSplit[2]));
                         break;

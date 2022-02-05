@@ -54,4 +54,19 @@ public class GameServiceImpl implements GameService {
 
         DbSessionManager.getUnitOfWork().commit();
     }
+
+    @Override
+    public void listEligibleGamesByUser(String username) {
+
+        var user = User.getByUsername(username);
+
+        if (user == null) {
+            throw new IllegalArgumentException("User does not exist");
+        }
+
+
+        var games = Game.getByMinimumBalance(user.getBalance());
+
+        games.forEach(System.out::println);
+    }
 }

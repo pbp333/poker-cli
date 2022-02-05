@@ -8,6 +8,7 @@ public enum UserAction {
     // game related
     CREATE_FRIENDLY_GAME("createFriendlyGame"),
     CREATE_COMPETITIVE_GAME("createCompetitiveGame"),
+    LIST_GAMES("listGames"),
     JOIN_GAME("joinGame"),
     START_GAME("startGame"),
     BET("bet"),

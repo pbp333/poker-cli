@@ -10,8 +10,6 @@ public interface UserService {
 
     void addPayment(String user, BigDecimal amount, String paymentMethod);
 
-    void removePayment(String user, BigDecimal amount, String paymentMethod);
-
     void login(String username);
 
     void logout(String username);

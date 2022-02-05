@@ -210,7 +210,8 @@ public class User {
 
     protected void update() {
         try {
-            final String sql = "UPDATE cliuser SET name=?, balance=?, virtual_balance, updated_at where id = ?";
+            final String sql = "UPDATE cliuser SET name = ?, balance = ?, virtual_balance = ?, updated_at = ? " +
+                    "WHERE id = ?";
 
             Connection conn = DbSessionManager.getConnection();
 
@@ -219,6 +220,7 @@ public class User {
             pstmt.setBigDecimal(2, getBalance());
             pstmt.setBigDecimal(3, getVirtualBalance());
             pstmt.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+            pstmt.setLong(5, this.id);
             pstmt.executeUpdate();
 
         } catch (Exception e) {

@@ -30,6 +30,6 @@ public class AddBalance implements Command {
 
     @Override
     public void undo() {
-        service.removePayment(username, amount, paymentMethod);
+        throw new UnsupportedOperationException("Payment cannot be reverted... HAHAHAHAHAHA");
     }
 }

@@ -36,21 +36,11 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new IllegalArgumentException("user does not exist");
         }
-        PaymentServiceFactory.buildPaymentService(paymentMethod).addPayment(username, amount);
-        user.addBalance(amount);
-        DbSessionManager.getUnitOfWork().commit();
-    }
 
-    @Override
-    public void removePayment(String username, BigDecimal amount, String paymentMethod) {
+        BigDecimal amountAfterCut = amount.multiply(new BigDecimal(0.95));
 
-        var user = User.getByUsername(username);
-
-        if (user == null) {
-            throw new IllegalArgumentException("user does not exist");
-        }
-        PaymentServiceFactory.buildPaymentService(paymentMethod).cancelPayment(username, amount);
-        user.removeBalance(amount);
+        PaymentServiceFactory.buildPaymentService(paymentMethod).addPayment(username, amountAfterCut);
+        user.addBalance(amountAfterCut);
         DbSessionManager.getUnitOfWork().commit();
     }
 
