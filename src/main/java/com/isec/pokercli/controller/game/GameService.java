@@ -1,11 +1,10 @@
 package com.isec.pokercli.controller.game;
 
-import java.math.BigDecimal;
-
 public interface GameService {
 
-    long createGame(String type, int maxNumberOfPlayers, BigDecimal minimalBuyIn);
+    void createCompetitiveGame(String gameName, String owner, int maxNumberOfPlayers, Integer minimalBuyIn, Integer initialBet);
 
-    void deleteGame(long id);
+    void createFriendlyGame(String gameName, String owner);
 
+    void deleteGameByName(String username);
 }

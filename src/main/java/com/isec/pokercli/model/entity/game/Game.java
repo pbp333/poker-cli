@@ -8,104 +8,82 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class Game implements IGame {
+public class Game {
 
     private Long id;
-    private Long userId;
+    private String name;
+    private Long ownerId;
     private GameType gameType;
     private Integer maxPlayers;
-    private Integer chips;
+    private Integer initialPlayerPot;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private GameStatus status;
     private Integer bet;
 
-    public Game(Builder builder) {
-        this.id = builder.id;
-        this.userId = builder.userId;
-        this.gameType = builder.gameType;
-        this.maxPlayers = builder.bet;
-        this.chips = builder.chips;
-        this.status = builder.status;
-        this.bet = builder.bet;
+    private GameUnitOfWork unitOfWork = GameUnitOfWork.getInstance();
+
+    private Game() {
+
     }
 
-    @Override
+    private Game(Builder builder) {
+        this.id = builder.id;
+        this.name = builder.name;
+        this.ownerId = builder.ownerId;
+        this.gameType = builder.gameType;
+        this.maxPlayers = builder.maxPlayers;
+        this.initialPlayerPot = builder.initialPlayerPot;
+        this.status = builder.status;
+        this.bet = builder.bet;
+
+        unitOfWork.addCreated(this);
+    }
+
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public String getName() {
+        return name;
     }
 
-    @Override
-    public Long getUserId() {
-        return userId;
+    public Long getOwnerId() {
+        return ownerId;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    @Override
     public GameType getGameType() {
         return gameType;
     }
 
-    public void setGameType(GameType gameType) {
-        this.gameType = gameType;
-    }
-
-    @Override
     public Integer getMaxPlayers() {
         return maxPlayers;
     }
 
-    public void setMaxPlayers(Integer maxPlayers) {
-        this.maxPlayers = maxPlayers;
+    public Integer getInitialPlayerPot() {
+        return initialPlayerPot;
     }
 
-    @Override
-    public Integer getChips() {
-        return chips;
-    }
-
-    public void setChips(Integer chips) {
-        this.chips = chips;
-    }
-
-    @Override
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    @Override
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    @Override
     public GameStatus getStatus() {
         return status;
     }
 
-    public void setStatus(GameStatus status) {
-        this.status = status;
+    public Integer getBet() {
+        return bet;
     }
 
     public static List<Game> getAll() {
-        List<Game> result = new ArrayList<Game>();
+        List<Game> result = new ArrayList<>();
         try {
-            final String sql = "SELECT id, user_id, game_type, max_players, chips, created_at, updated_at, status FROM game";
+            final String sql = "SELECT id, owner_id, game_type, max_players, initial_player_pot, created_at, updated_at, status FROM game";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
             ResultSet rs = st.executeQuery();
@@ -122,22 +100,41 @@ public class Game implements IGame {
     }
 
     public static Game getById(Long id) {
-        Game result = null;
         try {
-            final String sql = "SELECT id, user_id, game_type, max_players, chips, created_at, updated_at, status FROM game WHERE id  = ?";
+            final String sql = "SELECT id, name, owner_id, game_type, max_players, initial_player_pot, created_at, updated_at, " +
+                    "status FROM game WHERE id  = ?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
             st.setLong(1, id);
             ResultSet rs = st.executeQuery();
             if (rs.next()) {
-                result = map(rs);
+                return map(rs);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return result;
+        return null;
+    }
+
+    public static Game getByName(String gameName) {
+        try {
+            final String sql = "SELECT id, name, owner_id, game_type, max_players, initial_player_pot, created_at, updated_at, " +
+                    "status FROM game WHERE name  = ?";
+            Connection conn = DbSessionManager.getConnection();
+            PreparedStatement st = conn.prepareStatement(sql);
+            st.setString(1, gameName);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return map(rs);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     /**
@@ -148,46 +145,50 @@ public class Game implements IGame {
      * @throws SQLException
      */
     private static Game map(ResultSet rs) throws SQLException {
-        Builder builder = new Game.Builder();
-        builder.withId(Long.valueOf(rs.getInt(1)));
-        builder.withUserId(rs.getLong(2));
+
+        Game game = new Game();
+        game.id = Long.valueOf(rs.getInt(1));
+        game.ownerId = rs.getLong(2);
         final String gameTypeStr = rs.getString(3);
-        builder.withMaxPlayers(rs.getInt(4));
-        builder.withChips(rs.getInt(5));
-        builder.withCreatedAt(rs.getTimestamp(6).toLocalDateTime());
-        builder.withUpdatedAt(rs.getTimestamp(7).toLocalDateTime());
+        game.maxPlayers = rs.getInt(4);
+        game.initialPlayerPot = rs.getInt(5);
+        game.createdAt = rs.getTimestamp(6).toLocalDateTime();
+        game.updatedAt = rs.getTimestamp(7).toLocalDateTime();
         final String statusStr = rs.getString(8);
 
         // map gametype and status to their enums
         Optional<GameType> gameType = GameType.getByString(gameTypeStr);
         if (gameType.isPresent()) {
-            builder.withGameType(gameType.get());
+            game.gameType = gameType.get();
         }
         Optional<GameStatus> status = GameStatus.getByString(statusStr);
         if (status.isPresent()) {
-            builder.withStatus(status.get());
+            game.status = status.get();
         }
-        return builder.build();
+        return game;
     }
 
     public int create() {
         try {
-            final String sql = "INSERT INTO game(user_id, game_type, max_players, chips, status) VALUES (?, ?, ?, ?, ?)";
+            final String sql = "INSERT INTO game(name, owner_id, game_type, max_players, initial_player_pot, bet, status) " +
+                    "VALUES (? ,?, ?, ?, ?, ?, ?)";
 
             Connection conn = DbSessionManager.getConnection();
 
             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pstmt.setLong(1, getUserId());
-            pstmt.setString(2, getGameType().name());
-            pstmt.setInt(3, getMaxPlayers());
-            pstmt.setInt(4, getChips());
-            pstmt.setString(5, getStatus().name());
+            pstmt.setString(1, name);
+            pstmt.setLong(2, ownerId);
+            pstmt.setString(3, gameType.name());
+            pstmt.setInt(4, maxPlayers);
+            pstmt.setInt(5, initialPlayerPot);
+            pstmt.setInt(6, bet);
+            pstmt.setString(7, status.name());
             pstmt.executeUpdate();
 
             ResultSet rs = pstmt.getGeneratedKeys();
             rs.next();
             int key = rs.getInt(1);
-            setId(Long.valueOf(key));
+            id = Long.valueOf(key);
 
             return key;
 
@@ -199,18 +200,14 @@ public class Game implements IGame {
 
     public void update() {
         try {
-            final String sql = "UPDATE game SET user_id=?, game_type=?, max_players=?, chips=?, updated_at=?, status=? where id = ?";
+            final String sql = "UPDATE game SET updated_at=?, status=? where id = ?";
 
             Connection conn = DbSessionManager.getConnection();
 
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setLong(1, getUserId());
-            pstmt.setString(2, getGameType().name());
-            pstmt.setInt(3, getMaxPlayers());
-            pstmt.setInt(4, getChips());
-            pstmt.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
-            pstmt.setString(6, getStatus().name());
-            pstmt.setLong(7, getId());
+            pstmt.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+            pstmt.setString(2, getStatus().name());
+            pstmt.setLong(3, getId());
             pstmt.executeUpdate();
 
         } catch (Exception e) {
@@ -233,6 +230,10 @@ public class Game implements IGame {
         }
     }
 
+    public void markAsDeleted() {
+        unitOfWork.addDeleted(this);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -243,12 +244,11 @@ public class Game implements IGame {
 
     public static class Builder {
         private Long id;
-        private Long userId;
+        private String name;
+        private Long ownerId;
         private GameType gameType;
         private Integer maxPlayers;
-        private Integer chips;
-        private LocalDateTime createdAt;
-        private LocalDateTime updatedAt;
+        private Integer initialPlayerPot;
         private GameStatus status;
         private Integer bet;
 
@@ -256,49 +256,42 @@ public class Game implements IGame {
 
         }
 
-        public Builder withId(Long id) {
-            this.userId = id;
-
+        public Builder id(Long id) {
+            this.id = id;
             return this;
         }
 
-        public Builder withUserId(Long userId) {
-            this.userId = userId;
+        public Builder name(String name) {
+            this.name = name;
             return this;
         }
 
-        public Builder withGameType(GameType type) {
-            this.gameType = type;
+        public Builder ownerId(Long ownerId) {
+            this.ownerId = ownerId;
             return this;
         }
 
-        public Builder withMaxPlayers(Integer max) {
-            this.maxPlayers = max;
+        public Builder gameType(GameType gameType) {
+            this.gameType = gameType;
             return this;
         }
 
-        public Builder withCreatedAt(LocalDateTime dateTime) {
-            this.createdAt = dateTime;
+        public Builder maxPlayers(Integer maxPlayers) {
+            this.maxPlayers = maxPlayers;
             return this;
         }
 
-        public Builder withUpdatedAt(LocalDateTime dateTime) {
-            this.updatedAt = dateTime;
+        public Builder initialPlayerPot(Integer initialPlayerPot) {
+            this.initialPlayerPot = initialPlayerPot;
             return this;
         }
 
-        public Builder withChips(Integer chips) {
-            this.chips = chips;
-            return this;
-        }
-
-
-        public Builder withStatus(GameStatus status) {
+        public Builder status(GameStatus status) {
             this.status = status;
             return this;
         }
 
-        public Builder withBet(Integer bet) {
+        public Builder bet(Integer bet) {
             this.bet = bet;
             return this;
         }

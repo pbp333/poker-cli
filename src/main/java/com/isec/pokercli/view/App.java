@@ -34,8 +34,13 @@ public class App {
 
             try {
                 switch (c.get()) {
-                    case CREATE_GAME:
-                        handler.apply(new CreateGame(inputSplit[1], Integer.parseInt(inputSplit[2]), new BigDecimal(inputSplit[3])));
+                    case CREATE_FRIENDLY_GAME:
+                        handler.apply(new CreateFriendlyGame(inputSplit[1], inputSplit[2]));
+                        break;
+                    case CREATE_COMPETITIVE_GAME:
+                        handler.apply(new CreateCompetitiveGame(inputSplit[1], inputSplit[2],
+                                Integer.parseInt(inputSplit[3]), Integer.parseInt(inputSplit[4]),
+                                Integer.parseInt(inputSplit[5])));
                         break;
                     case JOIN_GAME:
                         handler.apply(new JoinGame(inputSplit[1], inputSplit[2]));

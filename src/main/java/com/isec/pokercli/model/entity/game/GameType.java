@@ -4,9 +4,16 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public enum GameType {
-    COMPETITIVE, FRIENDLY;
+    COMPETITIVE("competitive"),
+    FRIENDLY("friendly");
 
-    public static Optional<GameType> getByString(String gameType) {
-        return Arrays.stream(GameType.values()).filter(e -> e.name().equals(gameType)).findFirst();
+    private final String type;
+
+    GameType(String type) {
+        this.type = type;
+    }
+
+    public static Optional<GameType> getByString(String type) {
+        return Arrays.stream(GameType.values()).filter(e -> e.type.equals(type)).findFirst();
     }
 }

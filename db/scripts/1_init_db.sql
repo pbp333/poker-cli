@@ -12,42 +12,43 @@ CREATE TABLE cliuser (
 
 CREATE TABLE game (
 	id INT NOT NULL AUTO_INCREMENT,
-	user_id INT NOT NULL,
+	name VARCHAR(15) NOT NULL,
+	owner_id INT NOT NULL,
     game_type VARCHAR(15) NOT NULL,
 	max_players INT NOT NULL,
-	chips INT NOT NULL,
+	initial_player_pot INT NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	status VARCHAR(10) NOT NULL, -- 'CREATED', 'ONGOING', 'FINISHED',
 	bet INT NOT NULL,
 	PRIMARY KEY (id),
-	FOREIGN KEY (user_id) REFERENCES cliuser(id)
+	FOREIGN KEY (owner_id) REFERENCES cliuser(id)
 );
 
 CREATE TABLE game_user (
 	id INT NOT NULL AUTO_INCREMENT,
 	game_id INT NOT NULL,
-	user_id INT NOT NULL,
+	owner_id INT NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY (game_id) REFERENCES game(id),
-	FOREIGN KEY (user_id) REFERENCES cliuser(id)
+	FOREIGN KEY (owner_id) REFERENCES cliuser(id)
 );
 
 CREATE TABLE message (
 	id INT NOT NULL AUTO_INCREMENT,
-	from_user_id INT NOT NULL,
-	to_user_id INT NOT NULL,
+	from_owner_id INT NOT NULL,
+	to_owner_id INT NOT NULL,
 	content TEXT,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	status VARCHAR(10) NOT NULL, -- 'SENT', 'READ'
 	PRIMARY KEY (id),
-	FOREIGN KEY (from_user_id) REFERENCES cliuser(id),
-	FOREIGN KEY (to_user_id) REFERENCES cliuser(id)
+	FOREIGN KEY (from_owner_id) REFERENCES cliuser(id),
+	FOREIGN KEY (to_owner_id) REFERENCES cliuser(id)
 );
 
 CREATE TABLE audit (
 	id INT NOT NULL AUTO_INCREMENT,
-	user_id INT NOT NULL,
+	owner_id INT NOT NULL,
 	type VARCHAR(20) NOT NULL,
 	log TEXT NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

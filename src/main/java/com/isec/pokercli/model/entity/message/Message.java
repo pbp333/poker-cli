@@ -76,7 +76,7 @@ public class Message implements IMessage {
     public static List<Message> getAll() {
         List<Message> result = new ArrayList<Message>();
         try {
-            final String sql = "SELECT id, from_user_id, to_user_id, content, created_at, status FROM message";
+            final String sql = "SELECT id, from_owner_id, to_owner_id, content, created_at, status FROM message";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
             ResultSet rs = st.executeQuery();
@@ -95,7 +95,7 @@ public class Message implements IMessage {
     public static Message getById(Long id) {
         Message result = null;
         try {
-            final String sql = "SELECT id, from_user_id, to_user_id, content, created_at, status FROM message WHERE id = ?";
+            final String sql = "SELECT id, from_owner_id, to_owner_id, content, created_at, status FROM message WHERE id = ?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
             st.setLong(1, id);
@@ -113,8 +113,8 @@ public class Message implements IMessage {
 
     public static Message getByOriginAndDestinationAndMessage(Long origin, Long destination, String message) {
         try {
-            final String sql = "SELECT id, from_user_id, to_user_id, content, created_at, status FROM message WHERE " +
-                    "from_user_id = ? AND to_user_id = ? AND content = ?";
+            final String sql = "SELECT id, from_owner_id, to_owner_id, content, created_at, status FROM message WHERE " +
+                    "from_owner_id = ? AND to_owner_id = ? AND content = ?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
             st.setLong(1, origin);
@@ -137,8 +137,8 @@ public class Message implements IMessage {
         List<Message> messages = new ArrayList<>();
 
         try {
-            final String sql = "SELECT id, from_user_id, to_user_id, content, created_at, status FROM message " +
-                    "WHERE to_user_id = ? AND status != 'READ'";
+            final String sql = "SELECT id, from_owner_id, to_owner_id, content, created_at, status FROM message " +
+                    "WHERE to_owner_id = ? AND status != 'READ'";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
             st.setLong(1, destination);
@@ -171,7 +171,7 @@ public class Message implements IMessage {
 
     protected Long create() {
         try {
-            final String sql = "INSERT INTO message(from_user_id, to_user_id, content, status) VALUES (?, ?, ?, ?)";
+            final String sql = "INSERT INTO message(from_owner_id, to_owner_id, content, status) VALUES (?, ?, ?, ?)";
 
             Connection conn = DbSessionManager.getConnection();
 
@@ -197,7 +197,7 @@ public class Message implements IMessage {
 
     protected void update() {
         try {
-            final String sql = "UPDATE message SET from_user_id=?, to_user_id=?, content=?, status=? where id = ?";
+            final String sql = "UPDATE message SET from_owner_id=?, to_owner_id=?, content=?, status=? where id = ?";
 
             Connection conn = DbSessionManager.getConnection();
 

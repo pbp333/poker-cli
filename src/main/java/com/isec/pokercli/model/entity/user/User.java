@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class User implements IUser {
+public class User {
 
     private Long id;
     private String name;
@@ -40,32 +40,26 @@ public class User implements IUser {
         return user;
     }
 
-    @Override
     public Long getId() {
         return id;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public BigDecimal getBalance() {
         return balance;
     }
 
-    @Override
     public BigDecimal getVirtualBalance() {
         return virtualBalance;
     }
 
-    @Override
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    @Override
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
@@ -83,13 +77,11 @@ public class User implements IUser {
         this.online = false;
     }
 
-    @Override
     public void addBalance(BigDecimal amount) {
         this.balance = this.balance.add(amount);
         unitOfWork.addUpdated(this);
     }
 
-    @Override
     public void removeBalance(BigDecimal amount) {
 
         if (amount.compareTo(balance) < 1) {

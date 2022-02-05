@@ -6,7 +6,8 @@ import java.util.Optional;
 public enum UserAction {
 
     // game related
-    CREATE_GAME("createGame"),
+    CREATE_FRIENDLY_GAME("createFriendlyGame"),
+    CREATE_COMPETITIVE_GAME("createCompetitiveGame"),
     JOIN_GAME("joinGame"),
     START_GAME("startGame"),
     BET("bet"),
