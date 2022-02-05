@@ -5,8 +5,8 @@ import com.isec.pokercli.model.session.DbSessionManager;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class User implements IUser {
 
@@ -16,8 +16,9 @@ public class User implements IUser {
     private BigDecimal virtualBalance;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private boolean online;
 
-    private static UserUnitOfWork userUnitOfWork = UserUnitOfWork.getInstance();
+    private static UserUnitOfWork unitOfWork = UserUnitOfWork.getInstance();
 
     private User() {
 
@@ -33,7 +34,7 @@ public class User implements IUser {
         user.createdAt = LocalDateTime.now();
         user.updatedAt = LocalDateTime.now();
 
-        userUnitOfWork.addCreated(user);
+        unitOfWork.addCreated(user);
 
         return user;
     }
@@ -68,10 +69,23 @@ public class User implements IUser {
         return updatedAt;
     }
 
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void login() {
+        this.online = true;
+        unitOfWork.track(this);
+    }
+
+    public void logout() {
+        this.online = false;
+    }
+
     @Override
     public void addBalance(BigDecimal amount) {
         this.balance = this.balance.add(amount);
-        userUnitOfWork.addUpdated(this);
+        unitOfWork.addUpdated(this);
     }
 
     @Override
@@ -82,29 +96,41 @@ public class User implements IUser {
         }
 
         this.balance = this.balance.subtract(amount);
-        userUnitOfWork.addUpdated(this);
+        unitOfWork.addUpdated(this);
     }
 
     public static List<User> getAll() {
-        List<User> result = new ArrayList<>();
+
+        List<User> users = unitOfWork.getUsers();
+        List<Long> userIds = users.stream().map(User::getId).collect(Collectors.toList());
         try {
-            final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM user";
+            String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM user";
+
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
+
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 User user = mapUserFromDb(rs);
-                result.add(user);
+                if (!userIds.contains(user.getId())) {
+                    users.add(user);
+                }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return result;
+        return users;
     }
 
     public static User getById(Long id) {
+
+        var user = unitOfWork.getById(id);
+
+        if (user != null) {
+            return user;
+        }
 
         try {
             final String sql = "SELECT id, name, balance, virtual_balance, created_at, updated_at FROM user WHERE id=?";
@@ -124,6 +150,12 @@ public class User implements IUser {
     }
 
     public static User getByUsername(String username) {
+
+        var user = unitOfWork.getByUsername(username);
+
+        if (user != null) {
+            return user;
+        }
 
         try {
 
@@ -215,6 +247,6 @@ public class User implements IUser {
     }
 
     public void remove() {
-        this.userUnitOfWork.addDeleted(this);
+        this.unitOfWork.addDeleted(this);
     }
 }

@@ -68,6 +68,11 @@ public class Message implements IMessage {
         return status;
     }
 
+    public void markAsRead() {
+        this.status = MessageStatus.READ;
+        unitOfWork.addUpdated(this);
+    }
+
     public static List<Message> getAll() {
         List<Message> result = new ArrayList<Message>();
         try {
