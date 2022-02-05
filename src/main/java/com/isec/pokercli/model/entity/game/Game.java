@@ -1,5 +1,6 @@
 package com.isec.pokercli.model.entity.game;
 
+import com.isec.pokercli.model.entity.user.User;
 import com.isec.pokercli.model.session.DbSessionManager;
 
 import java.math.BigDecimal;
@@ -7,6 +8,7 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Game {
 
@@ -21,6 +23,8 @@ public class Game {
     private LocalDateTime updatedAt;
     private GameStatus status;
     private Integer bet;
+
+    private List<User> users = new ArrayList<>();
 
     private GameUnitOfWork unitOfWork = GameUnitOfWork.getInstance();
 
@@ -98,7 +102,29 @@ public class Game {
                 Game game = map(rs);
                 result.add(game);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        result.forEach(gm -> {
+            gm.users = findUsersByGame(gm.id);
+        });
+
+        return result;
+    }
+
+    private static List<User> findUsersByGame(Long id) {
+        List<User> result = new ArrayList<>();
+        try {
+            final String sql = "SELECT user_id FROM game_user WHERE game_id = ?";
+            Connection conn = DbSessionManager.getConnection();
+            PreparedStatement st = conn.prepareStatement(sql);
+            st.setLong(1, id);
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                result.add(User.getById(rs.getLong(1)));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -125,19 +151,25 @@ public class Game {
             e.printStackTrace();
         }
 
+        result.forEach(gm -> {
+            gm.users = findUsersByGame(gm.id);
+        });
+
         return result;
     }
 
     public static Game getById(Long id) {
         try {
-            final String sql = "SELECT id, name, owner_id, game_type, max_players, buy_in, initial_player_pot, created_at, updated_at, " +
-                    "status FROM game WHERE id  = ?";
+            final String sql = "SELECT id, name, owner_id, game_type, max_players, buy_in, initial_player_pot, " +
+                    "created_at, updated_at, bet, status FROM game WHERE id  = ?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
             st.setLong(1, id);
             ResultSet rs = st.executeQuery();
             if (rs.next()) {
-                return map(rs);
+                var game = map(rs);
+                game.users = findUsersByGame(game.id);
+                return game;
             }
 
         } catch (Exception e) {
@@ -149,14 +181,16 @@ public class Game {
 
     public static Game getByName(String gameName) {
         try {
-            final String sql = "SELECT id, name, owner_id, game_type, max_players, buy_in, initial_player_pot, created_at, updated_at, " +
-                    "status FROM game WHERE name  = ?";
+            final String sql = "SELECT id, name, owner_id, game_type, max_players, buy_in, initial_player_pot, " +
+                    "created_at, updated_at, status, bet FROM game WHERE name  = ?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement st = conn.prepareStatement(sql);
             st.setString(1, gameName);
             ResultSet rs = st.executeQuery();
             if (rs.next()) {
-                return map(rs);
+                var game = map(rs);
+                game.users = findUsersByGame(game.id);
+                return game;
             }
 
         } catch (Exception e) {
@@ -182,12 +216,13 @@ public class Game {
         game.gameType = GameType.getByString(rs.getString(4))
                 .orElseThrow(() -> new IllegalStateException("Game Type is invalid"));
         game.maxPlayers = rs.getInt(5);
-        game.initialPlayerPot = rs.getInt(6);
-        game.createdAt = rs.getTimestamp(7).toLocalDateTime();
-        game.updatedAt = rs.getTimestamp(8).toLocalDateTime();
-        game.status = GameStatus.getByString(rs.getString(9))
+        game.buyIn = rs.getInt(6);
+        game.initialPlayerPot = rs.getInt(7);
+        game.createdAt = rs.getTimestamp(8).toLocalDateTime();
+        game.updatedAt = rs.getTimestamp(9).toLocalDateTime();
+        game.status = GameStatus.getByString(rs.getString(10))
                 .orElseThrow(() -> new IllegalStateException("Game Status is invalid"));
-        game.bet = rs.getInt(10);
+        game.bet = rs.getInt(11);
         return game;
 
     }
@@ -234,10 +269,77 @@ public class Game {
             pstmt.setLong(3, getId());
             pstmt.executeUpdate();
 
+            updateGameUsers();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    private void updateGameUsers() {
+        try {
+            List<Long> userIdsAssociated = new ArrayList<>();
+
+            final String sql = "SELECT user_id FROM game_user where game_id = ?";
+
+            Connection conn = DbSessionManager.getConnection();
+            PreparedStatement st = conn.prepareStatement(sql);
+            st.setLong(1, this.id);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                userIdsAssociated.add(rs.getLong(1));
+            }
+
+            List<Long> userIds = users.stream().map(User::getId).collect(Collectors.toList());
+
+            List<Long> usersAssociationToCreate = userIds.stream().filter(id -> !userIdsAssociated.contains(id))
+                    .collect(Collectors.toList());
+            List<Long> usersAssociationsToRemove = userIdsAssociated.stream().filter(id -> !userIds.contains(id))
+                    .collect(Collectors.toList());
+
+            usersAssociationToCreate.forEach(this::addUsersToGame);
+            usersAssociationsToRemove.forEach(this::removeUsersFromGame);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void addUsersToGame(Long userAssociationToCreate) {
+        try {
+            final String sql = "INSERT INTO game_user(user_id, game_id) VALUES (? ,?)";
+
+            Connection conn = DbSessionManager.getConnection();
+
+            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setLong(1, userAssociationToCreate);
+            pstmt.setLong(2, id);
+            pstmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void removeUsersFromGame(Long userAssociationToCreate) {
+        try {
+            final String sql = "DELETE FROM game_user WHERE user_id = ? AND game_id = ?";
+
+            Connection conn = DbSessionManager.getConnection();
+
+            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setLong(1, userAssociationToCreate);
+            pstmt.setLong(2, id);
+            pstmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     public void delete() {
         try {
@@ -260,6 +362,11 @@ public class Game {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public void addUser(User user) {
+        this.users.add(user);
+        unitOfWork.addUpdated(this);
     }
 
     /**
@@ -345,6 +452,7 @@ public class Game {
                 ", updatedAt=" + updatedAt +
                 ", status=" + status +
                 ", bet=" + bet +
+                ", users=[" + String.join(", ", users.stream().map(User::getName).collect(Collectors.toList())) + "]" +
                 '}';
     }
 }

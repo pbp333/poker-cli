@@ -69,4 +69,28 @@ public class GameServiceImpl implements GameService {
 
         games.forEach(System.out::println);
     }
+
+    @Override
+    public void addPlayerToGame(String username, String gameName) {
+        var user = User.getByUsername(username);
+
+        if (user == null) {
+            throw new IllegalArgumentException("User does not exist");
+        }
+
+        var game = Game.getByName(gameName);
+
+        if (game == null) {
+            throw new IllegalArgumentException("Game does not exist");
+        }
+
+        game.addUser(user);
+
+        DbSessionManager.getUnitOfWork().commit();
+    }
+
+    @Override
+    public void removePlayerFromGame(String username, String game) {
+
+    }
 }

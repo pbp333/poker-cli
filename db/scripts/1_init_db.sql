@@ -28,10 +28,10 @@ CREATE TABLE game (
 CREATE TABLE game_user (
 	id INT NOT NULL AUTO_INCREMENT,
 	game_id INT NOT NULL,
-	owner_id INT NOT NULL,
+	user_id INT NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY (game_id) REFERENCES game(id),
-	FOREIGN KEY (owner_id) REFERENCES cliuser(id)
+	FOREIGN KEY (user_id) REFERENCES cliuser(id)
 );
 
 CREATE TABLE message (

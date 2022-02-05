@@ -9,4 +9,8 @@ public interface GameService {
     void deleteGameByName(String username);
 
     void listEligibleGamesByUser(String username);
+
+    void addPlayerToGame(String username, String game);
+
+    void removePlayerFromGame(String username, String game);
 }
