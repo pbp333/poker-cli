@@ -1,5 +1,6 @@
 package com.isec.pokercli.cli.controller;
 
+import com.isec.pokercli.application.api.Command;
 import com.isec.pokercli.application.api.CommandHandler;
 import com.isec.pokercli.application.api.commands.*;
 import com.isec.pokercli.application.command.CommandHandlerImpl;
@@ -7,6 +8,7 @@ import com.isec.pokercli.cli.actions.ExitAction;
 import com.isec.pokercli.cli.actions.UserAction;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 public class CliControllerImpl implements CliController {
 
@@ -77,6 +79,9 @@ public class CliControllerImpl implements CliController {
             case MESSAGE:
                 handler.apply(new SendMessage(action[1], action[2], action[3]));
                 break;
+            case AUDIT:
+                handler.apply(buildAuditSearchCommand(action));
+                break;
             case UNDO:
                 handler.undo();
                 break;
@@ -86,6 +91,21 @@ public class CliControllerImpl implements CliController {
             case EXIT:
                 throw new ExitAction();
         }
+
+    }
+
+    private Command buildAuditSearchCommand(String[] action) {
+        var username = Arrays.stream(action).filter(act -> act.contains("user:")).findFirst()
+                .map(act -> act.split("user:")).map(array -> array[1]).orElse("");
+
+        var type = Arrays.stream(action).filter(act -> act.contains("type:")).findFirst()
+                .map(act -> act.split("type:")).map(array -> array[1]).orElse("");
+
+        var numberOfMessages = Arrays.stream(action).filter(act -> act.contains("limit:")).findFirst()
+                .map(act -> act.split("limit:")).map(array -> array[1]).map(lmt -> Integer.valueOf(lmt))
+                .orElse(null);
+
+        return new AuditEntrySearch(numberOfMessages, username, type);
 
     }
 }

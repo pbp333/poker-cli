@@ -8,11 +8,11 @@ import java.math.BigDecimal;
 
 public class AddBalance implements Command {
 
-    private String username;
-    private BigDecimal amount;
-    private String paymentMethod;
+    private final String username;
+    private final BigDecimal amount;
+    private final String paymentMethod;
 
-    private UserService service;
+    private final UserService service;
 
     public AddBalance(String username, BigDecimal amount, String paymentMethod) {
         this.username = username;

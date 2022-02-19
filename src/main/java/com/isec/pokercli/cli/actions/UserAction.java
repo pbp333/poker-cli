@@ -24,6 +24,9 @@ public enum UserAction {
     ADD_BALANCE("addBalance"),
     MESSAGE("message"),
 
+    // audits
+    AUDIT("audit"), // username, type, limit
+
     // others
     UNDO("undo"),
     REDO("redo"),
