@@ -11,15 +11,12 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void deliverMessage(String origin, String destination, String content) {
 
-        var originUser = User.getByUsername(origin);
-        if (originUser == null) {
-            throw new IllegalArgumentException("User does not exist - " + origin);
-        }
+        var originUser = User.getByUsername(origin)
+                .orElseThrow(() -> new IllegalArgumentException("Origin User is not valid"));
 
-        var destinationUser = User.getByUsername(destination);
-        if (destinationUser == null) {
-            throw new IllegalArgumentException("User does not exist - " + destination);
-        }
+        var destinationUser = User.getByUsername(destination)
+                .orElseThrow(() -> new IllegalArgumentException("Destination User is not valid"));
+
         var message = Message.from(originUser.getId(), destinationUser.getId(), content);
 
         if (destinationUser.isOnline()) {
@@ -32,15 +29,11 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void deleteMessage(String origin, String destination, String content) {
 
-        var originUser = User.getByUsername(origin);
-        if (originUser == null) {
-            throw new IllegalArgumentException("User does not exist - " + origin);
-        }
+        var originUser = User.getByUsername(origin)
+                .orElseThrow(() -> new IllegalArgumentException("Origin User is not valid"));
 
-        var destinationUser = User.getByUsername(destination);
-        if (destinationUser == null) {
-            throw new IllegalArgumentException("User does not exist - " + destination);
-        }
+        var destinationUser = User.getByUsername(destination)
+                .orElseThrow(() -> new IllegalArgumentException("Destination User is not valid"));
 
         var message = Message.getByOriginAndDestinationAndMessage(originUser.getId(), destinationUser.getId(), content);
 

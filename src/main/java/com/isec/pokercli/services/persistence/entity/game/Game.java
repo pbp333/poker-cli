@@ -27,7 +27,7 @@ public class Game {
 
     private List<User> users = new ArrayList<>();
 
-    private GameUnitOfWork unitOfWork = GameUnitOfWork.getInstance();
+    private final GameUnitOfWork unitOfWork = GameUnitOfWork.getInstance();
 
     private Game() {
 
@@ -111,9 +111,7 @@ public class Game {
             e.printStackTrace();
         }
 
-        result.forEach(gm -> {
-            gm.users = findUsersByGame(gm.id);
-        });
+        result.forEach(gm -> gm.users = findUsersByGame(gm.id));
 
         return result;
     }
@@ -128,7 +126,11 @@ public class Game {
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
-                result.add(User.getById(rs.getLong(1)));
+
+                var user = User.getById(rs.getLong(1))
+                        .orElseThrow(() -> new IllegalArgumentException("User is not valid, this should never happen"));
+
+                result.add(user);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -156,9 +158,7 @@ public class Game {
             e.printStackTrace();
         }
 
-        result.forEach(gm -> {
-            gm.users = findUsersByGame(gm.id);
-        });
+        result.forEach(gm -> gm.users = findUsersByGame(gm.id));
 
         return result;
     }
@@ -446,7 +446,7 @@ public class Game {
                 ", updatedAt=" + updatedAt +
                 ", status=" + status +
                 ", bet=" + bet +
-                ", users=[" + String.join(", ", users.stream().map(User::getName).collect(Collectors.toList())) + "]" +
+                ", users=[" + users.stream().map(User::getName).collect(Collectors.joining(", ")) + "]" +
                 '}';
     }
 }

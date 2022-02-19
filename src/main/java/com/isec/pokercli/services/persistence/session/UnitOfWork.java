@@ -1,7 +1,5 @@
 package com.isec.pokercli.services.persistence.session;
 
-import com.isec.pokercli.services.persistence.entity.game.GameUnitOfWork;
-import com.isec.pokercli.services.persistence.entity.message.MessageUnitOfWork;
 import com.isec.pokercli.services.persistence.entity.user.UserUnitOfWork;
 
 public class UnitOfWork {

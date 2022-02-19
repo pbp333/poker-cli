@@ -58,6 +58,10 @@ public class GameServiceImpl implements GameService {
         // create an empty game round associated with the game
         Game g = Game.getByName(gameName);
 
+        if (g == null) {
+            throw new IllegalArgumentException("Game is invalid");
+        }
+
         GameRound gr = new GameRound();
         gr.setGameId(g.getId());
         gr.create();

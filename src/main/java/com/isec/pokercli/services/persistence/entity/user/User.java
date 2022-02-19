@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class User {
@@ -17,6 +18,8 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean online;
+
+    private boolean markAsDeleted;
 
     private static UserUnitOfWork unitOfWork = UserUnitOfWork.getInstance();
 
@@ -73,7 +76,10 @@ public class User {
 
     public void addBalance(BigDecimal amount) {
         this.balance = this.balance.add(amount);
-        unitOfWork.addUpdated(this);
+
+        if (this.id != null) {
+            unitOfWork.addUpdated(this);
+        }
     }
 
     public void removeBalance(BigDecimal amount) {
@@ -83,7 +89,10 @@ public class User {
         }
 
         this.balance = this.balance.subtract(amount);
-        unitOfWork.addUpdated(this);
+
+        if (this.id != null) {
+            unitOfWork.addUpdated(this);
+        }
     }
 
     public static List<User> getAll() {
@@ -111,12 +120,12 @@ public class User {
         return users;
     }
 
-    public static User getById(Long id) {
+    public static Optional<User> getById(Long id) {
 
         var user = unitOfWork.getById(id);
 
         if (user != null) {
-            return user;
+            return Optional.of(user);
         }
 
         try {
@@ -127,22 +136,22 @@ public class User {
             pstmt.setLong(1, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return mapUserFromDb(rs);
+                return Optional.of(mapUserFromDb(rs));
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return null;
+        return Optional.empty();
     }
 
-    public static User getByUsername(String username) {
+    public static Optional<User> getByUsername(String username) {
 
         var user = unitOfWork.getByUsername(username);
 
         if (user != null) {
-            return user;
+            return Optional.of(user);
         }
 
         try {
@@ -155,14 +164,14 @@ public class User {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                return mapUserFromDb(rs);
+                return Optional.of(mapUserFromDb(rs));
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return null;
+        return Optional.empty();
     }
 
     private static User mapUserFromDb(ResultSet rs) throws SQLException {
@@ -235,12 +244,19 @@ public class User {
     }
 
     public void remove() {
-        this.unitOfWork.addDeleted(this);
+        if (this.id != null) {
+            this.unitOfWork.addDeleted(this);
+        } else {
+            this.unitOfWork.removeFromCreated(this);
+            this.unitOfWork.removeFromUpdated(this);
+        }
+
     }
 
     public void read(List<Message> messages) {
         messages.stream().forEach(message -> {
-            var origin = User.getById(message.getFromUserId());
+            var origin = User.getById(message.getFromUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User is not valid"));
             System.out.println("From - " + origin.getName() + ": " + message.getContent());
             message.markAsRead();
         });

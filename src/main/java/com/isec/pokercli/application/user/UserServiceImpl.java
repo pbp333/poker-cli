@@ -1,8 +1,8 @@
 package com.isec.pokercli.application.user;
 
+import com.isec.pokercli.services.payment.PaymentServiceFactory;
 import com.isec.pokercli.services.persistence.entity.message.Message;
 import com.isec.pokercli.services.persistence.entity.user.User;
-import com.isec.pokercli.services.payment.PaymentServiceFactory;
 import com.isec.pokercli.services.persistence.session.DbSessionManager;
 
 import java.math.BigDecimal;
@@ -18,11 +18,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void removeUser(String username) {
 
-        var user = User.getByUsername(username);
-
-        if (user == null) {
-            throw new IllegalArgumentException("user does not exist");
-        }
+        var user = User.getByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User is not valid"));
 
         user.remove();
         DbSessionManager.getUnitOfWork().commit();
@@ -31,11 +28,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void addPayment(String username, BigDecimal amount, String paymentMethod) {
 
-        var user = User.getByUsername(username);
-
-        if (user == null) {
-            throw new IllegalArgumentException("user does not exist");
-        }
+        var user = User.getByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User is not valid"));
 
         BigDecimal amountAfterCut = amount.multiply(new BigDecimal(0.95));
 
@@ -46,7 +40,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void login(String username) {
-        var user = User.getByUsername(username);
+        var user = User.getByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User is not valid"));
         user.login();
 
         user.read(Message.getNotReadByDestination(user.getId()));
@@ -56,7 +51,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void logout(String username) {
-        User.getByUsername(username).logout();
+        User.getByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User is not valid"))
+                .logout();
         DbSessionManager.getUnitOfWork().commit();
     }
 }

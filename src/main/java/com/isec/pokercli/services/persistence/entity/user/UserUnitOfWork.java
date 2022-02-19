@@ -1,7 +1,6 @@
 package com.isec.pokercli.services.persistence.entity.user;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class UserUnitOfWork {
 
@@ -27,20 +26,17 @@ public class UserUnitOfWork {
     }
 
     public void addUpdated(User entity) {
-        deleted.remove(entity);
         updated.add(entity);
     }
 
     public void addDeleted(User entity) {
-        created.remove(entity);
-        updated.remove(entity);
         deleted.add(entity);
     }
 
     public void commit() {
-        created.stream().forEach(User::create);
-        updated.stream().forEach(User::update);
-        deleted.stream().forEach(User::delete);
+        created.forEach(User::create);
+        updated.forEach(User::update);
+        deleted.forEach(User::delete);
 
         created.clear();
         updated.clear();
@@ -58,10 +54,10 @@ public class UserUnitOfWork {
 
     public List<User> getUsers() {
 
-        Set<User> users = idMap.values().stream().collect(Collectors.toSet());
+        Set<User> users = new HashSet<>(idMap.values());
         users.addAll(usernameMap.values());
 
-        return users.stream().collect(Collectors.toList());
+        return new ArrayList<>(users);
     }
 
     public User getById(Long id) {
@@ -71,4 +67,13 @@ public class UserUnitOfWork {
     public User getByUsername(String username) {
         return usernameMap.get(username);
     }
+
+    public void removeFromCreated(User user) {
+        created.remove(user);
+    }
+
+    public void removeFromUpdated(User user) {
+        updated.remove(user);
+    }
+
 }
