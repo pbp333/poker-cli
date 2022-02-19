@@ -4,7 +4,7 @@ public class AuditSearchParameters {
 
     private final Integer numberOfMessages;
     private final String user;
-    private final LogType type;
+    private final AuditType type;
 
     public AuditSearchParameters(Builder builder) {
         this.numberOfMessages = builder.numberOfMessages;
@@ -20,7 +20,7 @@ public class AuditSearchParameters {
         return user;
     }
 
-    public LogType getType() {
+    public AuditType getType() {
         return type;
     }
 
@@ -31,7 +31,7 @@ public class AuditSearchParameters {
     public static class Builder {
         private Integer numberOfMessages;
         private String user;
-        private LogType type;
+        private AuditType type;
 
         private Builder() {
 
@@ -47,7 +47,7 @@ public class AuditSearchParameters {
             return this;
         }
 
-        public Builder type(LogType type) {
+        public Builder type(AuditType type) {
             this.type = type;
             return this;
         }

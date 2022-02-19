@@ -1,12 +1,13 @@
-package com.isec.pokercli.application.logging;
+package com.isec.pokercli.application.audit.search;
 
 import com.isec.pokercli.services.persistence.entity.audit.AuditSearchParameters;
 
-public class LogLast implements LoggerSearch {
+public class AuditLast extends AuditDecorator {
 
     private final int numberOfMessages;
 
-    public LogLast(int numberOfMessages) {
+    public AuditLast(AuditSearch search, int numberOfMessages) {
+        super(search);
         this.numberOfMessages = numberOfMessages;
     }
 

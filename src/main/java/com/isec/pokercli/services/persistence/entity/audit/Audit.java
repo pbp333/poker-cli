@@ -8,7 +8,7 @@ public class Audit {
 
     private final Long id;
     private final User owner;
-    private final LogType type;
+    private final AuditType type;
     private final String log;
     private final LocalDateTime createdAt;
 
@@ -28,7 +28,7 @@ public class Audit {
         return owner;
     }
 
-    public LogType getType() {
+    public AuditType getType() {
         return type;
     }
 
@@ -47,7 +47,7 @@ public class Audit {
     public static class Builder {
         private Long id;
         private User owner;
-        private LogType type;
+        private AuditType type;
         private String log;
         private LocalDateTime createdAt;
 
@@ -65,7 +65,7 @@ public class Audit {
             return this;
         }
 
-        public Builder type(LogType type) {
+        public Builder type(AuditType type) {
             this.type = type;
             return this;
         }
@@ -83,5 +83,16 @@ public class Audit {
         public Audit build() {
             return new Audit(this);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Audit{" +
+                "id=" + id +
+                ", owner=" + owner.getName() +
+                ", type=" + type +
+                ", log='" + log + '\'' +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

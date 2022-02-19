@@ -1,6 +1,6 @@
 package com.isec.pokercli.services.persistence.entity.audit;
 
-public enum LogType {
+public enum AuditType {
 
     USER,
     GAME,

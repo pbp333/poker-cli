@@ -48,15 +48,15 @@ public class AuditMapper {
                 User user = User.getByUsername(searchParameters.getUser())
                         .orElseThrow(() -> new IllegalArgumentException("User is not valid"));
 
-                sqlBuilder.append("AND owner_id = ").append(user.getId());
+                sqlBuilder.append(" AND owner_id = ").append(user.getId());
             }
 
             if (searchParameters.getType() != null) {
-                sqlBuilder.append("AND type = ").append(searchParameters.getType().name());
+                sqlBuilder.append(" AND type = '").append(searchParameters.getType().name()).append("'");
             }
 
             if (searchParameters.getNumberOfMessages() != null) {
-                sqlBuilder.append("LIMIT ").append(searchParameters.getNumberOfMessages());
+                sqlBuilder.append(" LIMIT ").append(searchParameters.getNumberOfMessages());
             }
 
             PreparedStatement pstmt = conn.prepareStatement(sqlBuilder.toString(), Statement.RETURN_GENERATED_KEYS);
@@ -65,12 +65,12 @@ public class AuditMapper {
 
             while (rs.next()) {
 
-                User user = User.getByUsername(searchParameters.getUser())
+                User user = User.getById(rs.getLong(2))
                         .orElseThrow(() ->
                                 new IllegalStateException("User present in audit is no longer present, this should never happen"));
 
                 Audit audit = Audit.builder().id(rs.getLong(1)).owner(user)
-                        .type(LogType.valueOf(rs.getString(3))).log(rs.getString(4))
+                        .type(AuditType.valueOf(rs.getString(3))).log(rs.getString(4))
                         .createdAt(rs.getTimestamp(5).toLocalDateTime()).build();
                 audits.add(audit);
             }
@@ -80,7 +80,5 @@ public class AuditMapper {
         }
 
         return audits;
-
     }
-
 }

@@ -1,13 +1,13 @@
-package com.isec.pokercli.application.logging;
+package com.isec.pokercli.application.audit.search;
 
 import com.isec.pokercli.services.persistence.entity.audit.AuditSearchParameters;
-import com.isec.pokercli.services.persistence.entity.audit.LogType;
+import com.isec.pokercli.services.persistence.entity.audit.AuditType;
 
-public class LogByType extends LogDecorator {
+public class AuditByType extends AuditDecorator {
 
-    private final LogType type;
+    private final AuditType type;
 
-    public LogByType(LoggerSearch search, LogType type) {
+    public AuditByType(AuditSearch search, AuditType type) {
         super(search);
         this.type = type;
     }
