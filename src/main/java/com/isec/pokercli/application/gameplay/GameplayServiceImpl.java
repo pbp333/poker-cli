@@ -10,11 +10,8 @@ public class GameplayServiceImpl implements GameplayService {
 
     @Override
     public void dealCards(String gameName) {
-        Game game = Game.getByName(gameName);
-
-        if (game == null) {
-            throw new IllegalArgumentException("Game not found");
-        }
+        Game game = Game.getByName(gameName)
+                .orElseThrow(() -> new IllegalArgumentException("Game is not valid"));
 
         if (!game.getStatus().equals(GameStatus.ONGOING)) {
             throw new IllegalStateException("Game is not ongoing");

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Game {
@@ -99,6 +100,10 @@ public class Game {
         return Collections.unmodifiableList(users);
     }
 
+    public void start() {
+        this.status = GameStatus.ONGOING;
+    }
+
     public static List<Game> getAll() {
         List<Game> result = new ArrayList<>();
         try {
@@ -167,7 +172,7 @@ public class Game {
         return result;
     }
 
-    public static Game getById(Long id) {
+    public static Optional<Game> getById(Long id) {
         try {
             final String sql = "SELECT id, name, owner_id, game_type, max_players, buy_in, initial_player_pot, " +
                     "created_at, updated_at, bet, status FROM game WHERE id  = ?";
@@ -178,17 +183,17 @@ public class Game {
             if (rs.next()) {
                 var game = map(rs);
                 game.users = findUsersByGame(game.id);
-                return game;
+                return Optional.of(game);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return null;
+        return Optional.empty();
     }
 
-    public static Game getByName(String gameName) {
+    public static Optional<Game> getByName(String gameName) {
         try {
             final String sql = "SELECT id, name, owner_id, game_type, max_players, buy_in, initial_player_pot, " +
                     "created_at, updated_at, status, bet FROM game WHERE name  = ?";
@@ -199,14 +204,14 @@ public class Game {
             if (rs.next()) {
                 var game = map(rs);
                 game.users = findUsersByGame(game.id);
-                return game;
+                return Optional.of(game);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return null;
+        return Optional.empty();
     }
 
     /**

@@ -33,7 +33,7 @@ public class GameServiceImpl implements GameService {
 
         var game = Game.getByName(gameName);
 
-        if (game != null) {
+        if (game.isPresent()) {
             throw new IllegalArgumentException("Game name already exists");
         }
 
@@ -69,11 +69,8 @@ public class GameServiceImpl implements GameService {
 
     private void createGameRoundAssociatedWithGame(String gameName) {
         // create an empty game round associated with the game
-        Game game = Game.getByName(gameName);
-
-        if (game == null) {
-            throw new IllegalArgumentException("Game is invalid");
-        }
+        Game game = Game.getByName(gameName)
+                .orElseThrow(() -> new IllegalArgumentException("Game is not valid"));
 
         var user = User.getById(game.getOwnerId())
                 .orElseThrow(() -> new IllegalArgumentException("User is not valid, this should not happen"));
@@ -88,11 +85,8 @@ public class GameServiceImpl implements GameService {
     @Override
     public void deleteGameByName(String gameName) {
 
-        var game = Game.getByName(gameName);
-
-        if (game == null) {
-            throw new IllegalArgumentException("Game does not exist");
-        }
+        var game = Game.getByName(gameName)
+                .orElseThrow(() -> new IllegalArgumentException("Game is not valid"));
 
         var user = User.getById(game.getOwnerId())
                 .orElseThrow(() -> new IllegalArgumentException("User is not valid, this should not happen"));
@@ -123,11 +117,8 @@ public class GameServiceImpl implements GameService {
 
         var user = User.getByUsername(username).orElseThrow(() -> new IllegalArgumentException("User is not valid"));
 
-        var game = Game.getByName(gameName);
-
-        if (game == null) {
-            throw new IllegalArgumentException("Game does not exist");
-        }
+        var game = Game.getByName(gameName)
+                .orElseThrow(() -> new IllegalArgumentException("Game is not valid"));
 
         if (game.getUsers().size() >= game.getMaxPlayers()) {
             throw new IllegalStateException("Game is full");
@@ -142,13 +133,11 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void removePlayerFromGame(String username, String gameName) {
-        var user = User.getByUsername(username).orElseThrow(() -> new IllegalArgumentException("User is not valid"));
+        var user = User.getByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User is not valid"));
 
-        var game = Game.getByName(gameName);
-
-        if (game == null) {
-            throw new IllegalArgumentException("Game does not exist");
-        }
+        var game = Game.getByName(gameName)
+                .orElseThrow(() -> new IllegalArgumentException("Game is not valid"));
 
         game.removePlayer(user);
 
@@ -160,11 +149,10 @@ public class GameServiceImpl implements GameService {
     @Override
     public void startGame(String gameName) {
 
-        var game = Game.getByName(gameName);
+        var game = Game.getByName(gameName)
+                .orElseThrow(() -> new IllegalArgumentException("Game is not valid"));
 
-        if (game == null) {
-            throw new IllegalArgumentException("Game does not exist");
-        }
+        game.start();
 
         var user = User.getById(game.getOwnerId())
                 .orElseThrow(() -> new IllegalArgumentException("User is not valid, this should not happen"));
