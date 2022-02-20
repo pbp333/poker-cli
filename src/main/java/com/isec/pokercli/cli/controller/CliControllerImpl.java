@@ -49,6 +49,9 @@ public class CliControllerImpl implements CliController {
             case START_GAME:
                 handler.apply(new StartGame(action[1]));
                 break;
+            case DEAL_CARDS:
+                handler.apply(new DealCards(action[1]));
+                break;
             case BET:
                 handler.apply(new Bet(action[1], new BigDecimal(action[2])));
                 break;
@@ -58,11 +61,8 @@ public class CliControllerImpl implements CliController {
             case CHECK:
                 handler.apply(new Check(action[1]));
                 break;
-            case SHUFFLE_DECK:
-                handler.apply(new ShuffleDeck());
-                break;
-            case DEAL_CARDS:
-                handler.apply(new DealCards(action[1]));
+            case CALCULATE_WINNER:
+                handler.apply(new CalculateWinner(action[1]));
                 break;
             case CREATE_USER:
                 handler.apply(new CreateUser(action[1]));

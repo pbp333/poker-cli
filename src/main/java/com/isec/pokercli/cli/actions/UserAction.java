@@ -11,11 +11,11 @@ public enum UserAction {
     LIST_GAMES("listGames"),
     JOIN_GAME("joinGame"),
     START_GAME("startGame"),
+    DEAL_CARDS("dealCards"),
     BET("bet"),
     FOLD("fold"),
     CHECK("check"),
-    SHUFFLE_DECK("shuffleDeck"),
-    DEAL_CARDS("dealCards"),
+    CALCULATE_WINNER("calculateWinner"),
 
     // user related
     CREATE_USER("createUser"),

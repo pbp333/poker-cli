@@ -87,6 +87,10 @@ public class Game {
         return status;
     }
 
+    public void setStatus(GameStatus status) {
+        this.status = status;
+    }
+
     public Integer getBet() {
         return bet;
     }
@@ -298,7 +302,7 @@ public class Game {
             PreparedStatement st = conn.prepareStatement(sql);
             st.setLong(1, this.id);
             ResultSet rs = st.executeQuery();
-            if (rs.next()) {
+            while (rs.next()) {
                 userIdsAssociated.add(rs.getLong(1));
             }
 

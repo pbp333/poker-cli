@@ -1,5 +1,7 @@
 package com.isec.pokercli.application.game.deck.hand.resolver;
 
+import java.util.Arrays;
+
 public enum PokerResult {
 
     HIGH_CARD(1),
@@ -20,5 +22,14 @@ public enum PokerResult {
 
     public int getScore() {
         return score;
+    }
+
+    public static String getResultStringByScore(int score) {
+        PokerResult result = Arrays.stream(PokerResult.values())
+                .filter(e -> e.getScore() == score)
+                .findFirst()
+                .orElse(HIGH_CARD);
+
+        return result.name();
     }
 }
