@@ -14,9 +14,11 @@ import com.isec.pokercli.services.persistence.entity.game.*;
 import com.isec.pokercli.services.persistence.entity.game.card.DeckCard;
 import com.isec.pokercli.services.persistence.entity.user.User;
 import com.isec.pokercli.services.persistence.session.DbSessionManager;
+import com.isec.pokercli.services.persistence.session.UnitOfWork;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GameServiceImpl implements GameService {
@@ -252,6 +254,13 @@ public class GameServiceImpl implements GameService {
 
         List<GameUser> gameUsers = GameUser.getGameUsersByGameId(game.getId());
 
+        long invalidGameUsersCount = gameUsers.stream()
+                .filter(gu -> gu.getStatus().equals(GameUserStatus.DEFAULT))
+                .count();
+        if (invalidGameUsersCount > 0) {
+            throw new IllegalStateException("Cannot calculate game winner. Some players did not check or fold.");
+        }
+
         List<GameUser> gameUsersToConsider = gameUsers.stream()
                 .filter(gu -> gu.getStatus().equals(GameUserStatus.CHECK))
                 .collect(Collectors.toList());
@@ -259,7 +268,7 @@ public class GameServiceImpl implements GameService {
         int bestScore = 0;
         GameUser winner = null;
         HandResult winnerHandResult = null;
-        for (GameUser u: gameUsersToConsider) {
+        for (GameUser u : gameUsersToConsider) {
             List<DeckCard> gameUserHand = u.getPlayerCards();
             gameUserHand.addAll(tableCards);
 
@@ -279,14 +288,22 @@ public class GameServiceImpl implements GameService {
         final String playerCardsStr = winner.getPlayerCards().stream().map(c -> c.toString()).collect(Collectors.joining(","));
         final String auditMsg = String.format("Player won the round with [%s]. Table cards[%s] | Player cards[%s] | Amount won: [%d]",
                 winnerHandResult.getPokerResult().name(), tableCardsStr, playerCardsStr, gameRound.getTablePot());
+
         auditService.entry(Audit.builder().type(AuditType.GAME).owner(user).log(auditMsg).build());
 
-        // update winner balance
+        updateWinnerBalance(gameRound, winner);
+
+        prepareNextRound(gameRound, gameUsers);
+
+        removePlayersWithNoBalance(gameUsers);
+
+        checkForGameWinner(game);
+    }
+
+    private void updateWinnerBalance(GameRound gameRound, GameUser winner) {
         Integer playerPotAfterWin = winner.getCurrentPlayerPot() + gameRound.getTablePot();
         winner.setCurrentPlayerPot(playerPotAfterWin);
         winner.update();
-
-        prepareNextRound(gameRound, gameUsers);
     }
 
     private void prepareNextRound(GameRound gameRound, List<GameUser> gameUsers) {
@@ -306,5 +323,67 @@ public class GameServiceImpl implements GameService {
             u.setStatus(GameUserStatus.DEFAULT);
             u.update();
         });
+    }
+
+    private void removePlayersWithNoBalance(List<GameUser> gameUsers) {
+        gameUsers.stream()
+                .filter(u -> u.getCurrentPlayerPot().intValue() <= 0)
+                .forEach(u -> {
+                    u.delete();
+
+                    Optional<User> user = User.getById(u.getUserId());
+                    if (user.isPresent()) {
+                        auditService.entry(
+                                Audit.builder()
+                                        .type(AuditType.GAME)
+                                        .owner(user.get())
+                                        .log(String.format("Player '%s' lost. Removed from the game", user.get().getName()))
+                                        .build()
+                        );
+                    }
+                });
+    }
+
+    private void checkForGameWinner(Game game) {
+        List<GameUser> gameUsers = GameUser.getGameUsersByGameId(game.getId());
+
+        if (!gameUsers.isEmpty() && gameUsers.size() == 1) {
+
+            GameUser gameUser = gameUsers.get(0);
+
+            GameRound gameRound = GameRound.getByGameId(game.getId());
+
+            User user = User
+                    .getById(gameUser.getUserId())
+                    .orElseThrow(() -> new IllegalStateException("Cannot find the game winner User account to update balance"));
+
+            Integer buyIn = game.getBuyIn();
+            Integer initialPlayerPot = game.getInitialPlayerPot();
+
+            // Os PCJs são válidos apenas para esse jogo e são reconvertidos em PCs à mesma
+            // taxa de conversão quando o jogo termina
+            // Regra 3 simples
+            // buy in -> initial player pot
+            // x      -> game player pot
+            BigDecimal amountWon = BigDecimal.valueOf((buyIn * gameUser.getCurrentPlayerPot()) / initialPlayerPot);
+
+            user.addBalance(amountWon);
+
+            game.setStatus(GameStatus.FINISHED);
+
+            UnitOfWork.getInstance().commit();
+
+            auditService.entry(
+                    Audit.builder()
+                            .type(AuditType.GAME)
+                            .owner(user)
+                            .log("Player won the game. Amount added to balance: " + amountWon)
+                            .build()
+            );
+
+            // clean up
+            gameUser.delete();
+            gameRound.delete();
+        }
     }
 }
