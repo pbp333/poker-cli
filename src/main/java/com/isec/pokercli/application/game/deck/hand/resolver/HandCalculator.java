@@ -28,7 +28,7 @@ public class HandCalculator {
         var results = possibleHands.stream().map(HandCalculator::calculateResult)
                 .collect(Collectors.toList());
 
-        return results.stream().sorted(Comparator.comparing(HandResult::calculateScore, Comparator.naturalOrder()))
+        return results.stream().sorted(Comparator.comparing(HandResult::calculateScore, Comparator.reverseOrder()))
                 .findFirst().orElse(null);
     }
 

@@ -39,6 +39,8 @@ public class GameServiceImpl implements GameService {
 
         var user = User.getByUsername(owner).orElseThrow(() -> new IllegalArgumentException("User is not valid"));
 
+        user.removeBalance(BigDecimal.valueOf(buyIn));
+
         GameCreator creator = new FriendlyGameCreator(gameName, user.getId());
 
         creator = new CompetitiveGameCreator(creator, maxNumberOfPlayers, buyIn, initialPlayerPot, initialBet);
@@ -162,11 +164,19 @@ public class GameServiceImpl implements GameService {
         game.setStatus(GameStatus.ONGOING);
         game.update();
 
+        // create a game user record for the game owner
         GameUser gu = new GameUser();
         gu.setGameId(game.getId());
         gu.setUserId(user.getId());
         gu.setCurrentPlayerPot(game.getInitialPlayerPot());
         gu.create();
+
+        // remove balance from non-owner users
+        game.getUsers().stream()
+                .filter(u -> u.getId() != game.getOwnerId())
+                .forEach(u -> u.removeBalance(BigDecimal.valueOf(game.getBuyIn())));
+
+        DbSessionManager.getUnitOfWork().commit();
     }
 
     @Override
@@ -231,11 +241,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void calculateWinner(String gameName) {
-        var game = Game.getByName(gameName);
-
-        if (game == null) {
-            throw new IllegalArgumentException("Game does not exist");
-        }
+        var game = Game.getByName(gameName).orElseThrow(() -> new IllegalArgumentException("Game does not exist"));
 
         var gameRound = GameRound.getByGameId(game.getId());
         if (gameRound == null) {
@@ -252,6 +258,7 @@ public class GameServiceImpl implements GameService {
 
         int bestScore = 0;
         GameUser winner = null;
+        HandResult winnerHandResult = null;
         for (GameUser u: gameUsersToConsider) {
             List<DeckCard> gameUserHand = u.getPlayerCards();
             gameUserHand.addAll(tableCards);
@@ -261,6 +268,7 @@ public class GameServiceImpl implements GameService {
             if (playerScore > bestScore) {
                 bestScore = playerScore;
                 winner = u;
+                winnerHandResult = playerHandResult;
             }
         }
 
@@ -270,7 +278,7 @@ public class GameServiceImpl implements GameService {
         final String tableCardsStr = tableCards.stream().map(c -> c.toString()).collect(Collectors.joining(","));
         final String playerCardsStr = winner.getPlayerCards().stream().map(c -> c.toString()).collect(Collectors.joining(","));
         final String auditMsg = String.format("Player won the round with [%s]. Table cards[%s] | Player cards[%s] | Amount won: [%d]",
-                PokerResult.getResultStringByScore(bestScore), tableCardsStr, playerCardsStr, gameRound.getTablePot());
+                winnerHandResult.getPokerResult().name(), tableCardsStr, playerCardsStr, gameRound.getTablePot());
         auditService.entry(Audit.builder().type(AuditType.GAME).owner(user).log(auditMsg).build());
 
         // update winner balance

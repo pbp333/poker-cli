@@ -5,14 +5,14 @@ import java.util.Arrays;
 public enum PokerResult {
 
     HIGH_CARD(1),
-    ONE_PAIR(200),
-    TWO_PAIR(300),
-    THREE_OF_A_KIND(400),
-    STRAIGHT(500),
-    FLUSH(600),
-    FULL_HOUSE(700),
-    FOUR_OF_A_KIND(800),
-    STRAIGHT_FLUSH(900);
+    ONE_PAIR(100),
+    TWO_PAIR(500),
+    THREE_OF_A_KIND(1000),
+    STRAIGHT(2000),
+    FLUSH(4000),
+    FULL_HOUSE(8000),
+    FOUR_OF_A_KIND(16000),
+    STRAIGHT_FLUSH(32000);
 
     private final int score;
 
@@ -24,12 +24,4 @@ public enum PokerResult {
         return score;
     }
 
-    public static String getResultStringByScore(int score) {
-        PokerResult result = Arrays.stream(PokerResult.values())
-                .filter(e -> e.getScore() == score)
-                .findFirst()
-                .orElse(HIGH_CARD);
-
-        return result.name();
-    }
 }

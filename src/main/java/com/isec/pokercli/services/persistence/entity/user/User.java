@@ -84,7 +84,7 @@ public class User {
 
     public void removeBalance(BigDecimal amount) {
 
-        if (amount.compareTo(balance) < 1) {
+        if (balance.subtract(amount).intValue() < 0) {
             throw new IllegalStateException("User does not have sufficient balance");
         }
 
