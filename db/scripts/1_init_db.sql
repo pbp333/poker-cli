@@ -32,6 +32,7 @@ CREATE TABLE game_user (
 	current_player_pot INT NOT NULL,
 	card1 VARCHAR(3),
     card2 VARCHAR(3),
+    status tinyint(1) NOT NULL DEFAULT 0,
 	PRIMARY KEY (id),
 	FOREIGN KEY (game_id) REFERENCES game(id),
 	FOREIGN KEY (user_id) REFERENCES cliuser(id)

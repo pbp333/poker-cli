@@ -4,24 +4,25 @@ import com.isec.pokercli.application.api.Command;
 import com.isec.pokercli.application.game.GameService;
 import com.isec.pokercli.application.game.GameServiceImpl;
 
-public class StartGame implements Command {
+public class CalculateWinner implements Command {
 
-    private final String gameName;
+    private String game;
 
     private final GameService service;
 
-    public StartGame(String gameName) {
-        this.gameName = gameName;
+    public CalculateWinner(String game) {
+        this.game = game;
+
         this.service = new GameServiceImpl();
     }
 
     @Override
     public void execute() {
-        service.startGame(gameName);
+        service.calculateWinner(game);
     }
 
     @Override
     public void undo() {
-        service.deleteGameByName(gameName);
+        throw new IllegalArgumentException("Cannot undo calculate winner");
     }
 }

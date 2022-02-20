@@ -35,4 +35,9 @@ public class DeckCard {
     public String getDatabaseFormat() {
         return rank.getCode() + suit.getCode();
     }
+
+    @Override
+    public String toString() {
+        return getDatabaseFormat();
+    }
 }

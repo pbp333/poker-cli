@@ -4,6 +4,10 @@ import com.isec.pokercli.services.persistence.entity.game.card.DeckCard;
 import com.isec.pokercli.services.persistence.session.DbSessionManager;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class GameUser {
     private Long id;
@@ -12,6 +16,7 @@ public class GameUser {
     private Integer currentPlayerPot;
     private DeckCard card1;
     private DeckCard card2;
+    private GameUserStatus status;
 
     public Long getId() {
         return id;
@@ -61,10 +66,25 @@ public class GameUser {
         this.card2 = card2;
     }
 
+    public GameUserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(GameUserStatus status) {
+        this.status = status;
+    }
+
+    public List<DeckCard> getPlayerCards() {
+        List<DeckCard> result = new ArrayList<>();
+        result.add(card1);
+        result.add(card2);
+        return result;
+    }
+
     public static GameUser getByUserId(Long userId) {
         try {
-            final String sql = "SELECT id, game_id, user_id, current_player_pot, card1, card2 FROM game_user " +
-                    "WHERE id=?";
+            final String sql = "SELECT id, game_id, user_id, current_player_pot, card1, card2, status FROM game_user " +
+                    "WHERE user_id=?";
             Connection conn = DbSessionManager.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setLong(1, userId);
@@ -80,6 +100,31 @@ public class GameUser {
         return null;
     }
 
+    public static List<GameUser> getGameUsersByGameId(Long gameId) {
+        List<GameUser> result = new ArrayList<>();
+        try {
+            final String sql = "SELECT id, game_id, user_id, current_player_pot, card1, card2, status FROM game_user " +
+                    "WHERE game_id=?";
+            Connection conn = DbSessionManager.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setLong(1, gameId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                GameUser gu = map(rs);
+                result.add(gu);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (result.isEmpty()) {
+            return null;
+        }
+
+        return result;
+    }
+
     private static GameUser map(ResultSet rs) throws SQLException {
         GameUser gameUser = new GameUser();
 
@@ -91,6 +136,7 @@ public class GameUser {
         gameUser.currentPlayerPot = rs.getInt(++i);
         gameUser.card1 = DeckCard.mapDeckCard(rs.getString(++i));
         gameUser.card2 = DeckCard.mapDeckCard(rs.getString(++i));
+        gameUser.status = GameUserStatus.getByInt(rs.getInt(++i));
 
         return gameUser;
     }
@@ -119,15 +165,16 @@ public class GameUser {
     public void update() {
         try {
             final String sql = "UPDATE game_user SET current_player_pot=?, card1=?, " +
-                    "card2=? WHERE id=?";
+                    "card2=?, status=? WHERE id=?";
 
             Connection conn = DbSessionManager.getConnection();
 
             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             int i = 0;
             pstmt.setInt(++i, currentPlayerPot);
-            pstmt.setString(++i, card1.getDatabaseFormat());
-            pstmt.setString(++i, card2.getDatabaseFormat());
+            pstmt.setString(++i, card1 != null ? card1.getDatabaseFormat() : null);
+            pstmt.setString(++i, card2 != null ? card2.getDatabaseFormat() : null);
+            pstmt.setInt(++i, status.getStatus());
             pstmt.setLong(++i, id);
             pstmt.executeUpdate();
 

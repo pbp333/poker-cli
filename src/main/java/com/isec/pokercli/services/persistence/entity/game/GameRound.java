@@ -4,6 +4,8 @@ import com.isec.pokercli.services.persistence.entity.game.card.DeckCard;
 import com.isec.pokercli.services.persistence.session.DbSessionManager;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameRound {
 
@@ -78,6 +80,16 @@ public class GameRound {
 
     public void setCard5(DeckCard card5) {
         this.card5 = card5;
+    }
+
+    public List<DeckCard> getTableCards() {
+        List<DeckCard> result = new ArrayList<>();
+        result.add(card1);
+        result.add(card2);
+        result.add(card3);
+        result.add(card4);
+        result.add(card5);
+        return result;
     }
 
     public static GameRound getByGameId(Long id) {
