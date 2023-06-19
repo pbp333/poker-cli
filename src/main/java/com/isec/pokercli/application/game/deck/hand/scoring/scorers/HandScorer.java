@@ -10,6 +10,7 @@ public abstract class HandScorer {
         return resolve(cards);
     }
 
+
     protected abstract int resolve(List<DeckCard> cards);
 
 }
